@@ -59,6 +59,8 @@
         flow.current = target;
         syncStepper(target);
         syncPanels(target);
+        // 供 CSS 选择当前步骤显示哪一组底部操作按钮
+        document.body.dataset.flowStep = String(target);
         if (typeof config.onEnter === 'function') {
           var result = config.onEnter(target, previous, settings);
           if (result && typeof result.then === 'function') {

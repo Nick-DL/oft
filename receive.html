@@ -17,7 +17,7 @@
     <script src="./vendor/mdui/mdui.global.js"></script>
     <script src="./js/theme.js"></script>
   </head>
-  <body class="oft-page oft-receive">
+  <body class="oft-page oft-receive" data-flow-step="1">
     <mdui-top-app-bar class="app-bar">
       <mdui-button-icon id="back-home" icon="arrow_back" aria-label="返回首页"></mdui-button-icon>
       <mdui-top-app-bar-title>接收</mdui-top-app-bar-title>
@@ -32,15 +32,15 @@
         <div class="flow-col">
           <ol class="stepper" id="stepper" aria-label="接收步骤">
             <li data-step="1" data-state="active">
-              <span class="step-dot">1</span>
+              <span class="step-dot"><b>1</b><mdui-icon name="check" aria-hidden="true"></mdui-icon></span>
               <span class="step-text"><strong>开始</strong><small>了解流程与前提</small></span>
             </li>
             <li data-step="2" data-state="todo">
-              <span class="step-dot">2</span>
+              <span class="step-dot"><b>2</b><mdui-icon name="check" aria-hidden="true"></mdui-icon></span>
               <span class="step-text"><strong>扫码</strong><small>对准发送端屏幕</small></span>
             </li>
             <li data-step="3" data-state="todo">
-              <span class="step-dot">3</span>
+              <span class="step-dot"><b>3</b><mdui-icon name="check" aria-hidden="true"></mdui-icon></span>
               <span class="step-text"><strong>完成</strong><small>保存文件或复制文字</small></span>
             </li>
           </ol>
@@ -82,10 +82,6 @@
               </span>
             </div>
 
-            <div class="step-actions">
-              <mdui-button id="start-scan" variant="filled" icon="videocam">开始扫描</mdui-button>
-              <mdui-button variant="text" icon="open_in_new" href="./core/receive.html" target="_blank" rel="noopener">独立打开核心接收端</mdui-button>
-            </div>
             <p class="oft-small oft-muted">摄像头画面只在本机处理；二维码内容未加密，请不要用光学链路传机密信息。</p>
           </section>
 
@@ -100,11 +96,6 @@
             <div class="step-note">
               <mdui-icon name="tips_and_updates" aria-hidden="true"></mdui-icon>
               <span>进度条纹丝不动时：把发送端的「每帧字节」降到 1000 左右、帧率降到 20–30，再试一次；距离 20–40 厘米通常最稳。</span>
-            </div>
-
-            <div class="step-actions">
-              <mdui-button id="retry-camera" variant="tonal" icon="refresh" hidden>重新启动摄像头</mdui-button>
-              <mdui-button id="back-step-1" variant="text" icon="arrow_back">返回说明</mdui-button>
             </div>
           </section>
 
@@ -121,13 +112,6 @@
               <div class="kv"><dt>大小</dt><dd id="result-size">—</dd></div>
               <div class="kv"><dt>校验</dt><dd id="result-checksum">—</dd></div>
             </dl>
-
-            <div class="step-actions">
-              <mdui-button id="save-file" variant="filled" icon="download" hidden>保存文件</mdui-button>
-              <mdui-button id="copy-text" variant="tonal" icon="content_copy" hidden>复制文字</mdui-button>
-              <mdui-button id="receive-again" variant="outlined" icon="restart_alt">再接收一个</mdui-button>
-              <mdui-button id="back-to-scan" variant="text" icon="arrow_back" hidden>重新扫描</mdui-button>
-            </div>
           </section>
         </div>
 
@@ -170,6 +154,22 @@
         </aside>
       </div>
     </main>
+
+    <!-- 三个步骤共用一条固定在页面底部的操作栏（MD3 BottomAppBar） -->
+    <mdui-bottom-app-bar class="actions-bar">
+      <div class="actions-inner">
+        <mdui-button data-step="1" id="start-scan" variant="filled" icon="videocam">开始扫描</mdui-button>
+        <mdui-button data-step="1" variant="text" icon="open_in_new" href="./core/receive.html" target="_blank" rel="noopener">独立打开核心接收端</mdui-button>
+
+        <mdui-button data-step="2" id="retry-camera" variant="tonal" icon="refresh" hidden>重新启动摄像头</mdui-button>
+        <mdui-button data-step="2" id="back-step-1" variant="text" icon="arrow_back">返回说明</mdui-button>
+
+        <mdui-button data-step="3" id="save-file" variant="filled" icon="download" hidden>保存文件</mdui-button>
+        <mdui-button data-step="3" id="copy-text" variant="tonal" icon="content_copy" hidden>复制文字</mdui-button>
+        <mdui-button data-step="3" id="receive-again" variant="outlined" icon="restart_alt">再接收一个</mdui-button>
+        <mdui-button data-step="3" id="back-to-scan" variant="text" icon="arrow_back" hidden>重新扫描</mdui-button>
+      </div>
+    </mdui-bottom-app-bar>
 
     <script src="./js/app.js"></script>
     <script src="./js/stepper.js"></script>

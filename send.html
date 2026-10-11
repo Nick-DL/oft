@@ -17,7 +17,7 @@
     <script src="./vendor/mdui/mdui.global.js"></script>
     <script src="./js/theme.js"></script>
   </head>
-  <body class="oft-page oft-send">
+  <body class="oft-page oft-send" data-flow-step="1">
     <mdui-top-app-bar class="app-bar">
       <mdui-button-icon id="back-home" icon="arrow_back" aria-label="返回首页"></mdui-button-icon>
       <mdui-top-app-bar-title>发送</mdui-top-app-bar-title>
@@ -32,15 +32,15 @@
         <div class="flow-col">
           <ol class="stepper" id="stepper" aria-label="发送步骤">
             <li data-step="1" data-state="active">
-              <span class="step-dot">1</span>
+              <span class="step-dot"><b>1</b><mdui-icon name="check" aria-hidden="true"></mdui-icon></span>
               <span class="step-text"><strong>选择内容</strong><small>文件或一段文字</small></span>
             </li>
             <li data-step="2" data-state="todo">
-              <span class="step-dot">2</span>
+              <span class="step-dot"><b>2</b><mdui-icon name="check" aria-hidden="true"></mdui-icon></span>
               <span class="step-text"><strong>对端打开接收页</strong><small>扫码或输入网址</small></span>
             </li>
             <li data-step="3" data-state="todo">
-              <span class="step-dot">3</span>
+              <span class="step-dot"><b>3</b><mdui-icon name="check" aria-hidden="true"></mdui-icon></span>
               <span class="step-text"><strong>对准屏幕扫描</strong><small>展示二维码并等待</small></span>
             </li>
           </ol>
@@ -98,11 +98,6 @@
                 helper="上限 4 MB；网址、口令、配置片段都很合适"
               ></mdui-text-field>
             </div>
-
-            <div class="step-actions">
-              <mdui-button id="to-step-2" variant="filled" end-icon="arrow_forward" disabled>下一步</mdui-button>
-              <span class="oft-small oft-muted" id="step1-hint">先选择文件，或切换到「文字」输入内容</span>
-            </div>
           </section>
 
           <!-- 第 2 步：让对端打开接收页 -->
@@ -129,11 +124,6 @@
             <div class="step-note">
               <mdui-icon name="videocam" aria-hidden="true"></mdui-icon>
               <span>接收端必须允许摄像头：只有 <b>https://</b> 或 <b>http://localhost</b> 打开时浏览器才会授权；局域网 http 地址会被拒绝。</span>
-            </div>
-
-            <div class="step-actions">
-              <mdui-button id="to-step-1" variant="text" icon="arrow_back">上一步</mdui-button>
-              <mdui-button id="to-step-3" variant="filled" end-icon="qr_code_2">开始显示二维码</mdui-button>
             </div>
           </section>
 
@@ -197,11 +187,6 @@
                 </p>
               </mdui-collapse-item>
             </mdui-collapse>
-
-            <div class="step-actions">
-              <mdui-button id="to-step-2b" variant="text" icon="arrow_back">上一步</mdui-button>
-              <mdui-button id="reset-flow" variant="text" icon="restart_alt">重新选择内容</mdui-button>
-            </div>
           </section>
         </div>
 
@@ -234,6 +219,20 @@
         </aside>
       </div>
     </main>
+
+    <!-- 三个步骤共用一条固定在页面底部的操作栏（MD3 BottomAppBar） -->
+    <mdui-bottom-app-bar class="actions-bar">
+      <div class="actions-inner">
+        <mdui-button data-step="1" id="to-step-2" variant="filled" end-icon="arrow_forward" disabled>下一步</mdui-button>
+        <span data-step="1" class="oft-small oft-muted actions-hint" id="step1-hint">先选择文件，或切换到「文字」输入内容</span>
+
+        <mdui-button data-step="2" id="to-step-1" variant="text" icon="arrow_back">上一步</mdui-button>
+        <mdui-button data-step="2" id="to-step-3" variant="filled" end-icon="qr_code_2">开始显示二维码</mdui-button>
+
+        <mdui-button data-step="3" id="to-step-2b" variant="text" icon="arrow_back">上一步</mdui-button>
+        <mdui-button data-step="3" id="reset-flow" variant="text" icon="restart_alt">重新选择内容</mdui-button>
+      </div>
+    </mdui-bottom-app-bar>
 
     <script src="./js/app.js"></script>
     <script src="./js/stepper.js"></script>

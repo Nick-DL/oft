@@ -180,54 +180,82 @@ mdui-button.home-action::part(end-icon) { font-size: 1.5rem; opacity: .75; }
 }
 .flow-col { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
 
+/* 步骤条：电脑上一排三步（带连接线），窄屏是可横滑的胶囊 */
 .stepper {
   display: flex;
-  flex-direction: column;
   gap: .25rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 .stepper li {
+  position: relative;
   display: flex;
-  align-items: flex-start;
-  gap: .875rem;
-  padding: .5rem .75rem .5rem .5rem;
-  border-radius: var(--mdui-shape-corner-large);
+  flex: 1 1 0;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  padding: .875rem .75rem;
+  text-align: center;
   color: rgb(var(--mdui-color-on-surface-variant));
-  transition: background-color var(--mdui-motion-duration-short4) var(--mdui-motion-easing-standard),
-    color var(--mdui-motion-duration-short4) var(--mdui-motion-easing-standard);
 }
+/* 步骤之间的连接线（从上一项中线拉过来，末端给圆点留空） */
+.stepper li::before {
+  content: "";
+  position: absolute;
+  top: 1.6875rem;
+  right: 50%;
+  left: 0;
+  height: .125rem;
+  margin-right: 1.375rem;
+  border-radius: .0625rem;
+  background-color: rgb(var(--mdui-color-outline-variant));
+  transition: background-color var(--mdui-motion-duration-medium2) var(--mdui-motion-easing-standard);
+}
+.stepper li:first-child::before { display: none; }
+.stepper li[data-state="done"]::before,
+.stepper li[data-state="active"]::before { background-color: rgb(var(--mdui-color-primary)); }
+
 .stepper li .step-dot {
+  position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
   flex: none;
   width: 1.75rem;
   height: 1.75rem;
-  margin-top: .1rem;
   border-radius: var(--mdui-shape-corner-full);
   border: 1px solid rgb(var(--mdui-color-outline));
+  background-color: rgb(var(--mdui-color-surface));
   font-size: var(--mdui-typescale-label-large-size);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
+  transition: background-color var(--mdui-motion-duration-medium2) var(--mdui-motion-easing-standard),
+    border-color var(--mdui-motion-duration-medium2) var(--mdui-motion-easing-standard),
+    color var(--mdui-motion-duration-medium2) var(--mdui-motion-easing-standard);
 }
+.stepper li .step-dot b { font-weight: 500; }
+.stepper li .step-dot mdui-icon { display: none; font-size: 1.125rem; }
 .stepper li .step-text { display: flex; flex-direction: column; min-width: 0; }
 .stepper li .step-text strong { font-weight: 500; font-size: var(--mdui-typescale-body-large-size); }
 .stepper li .step-text small { font-size: var(--mdui-typescale-body-small-size); opacity: .8; }
+
 .stepper li[data-state="done"] { color: rgb(var(--mdui-color-on-surface)); }
 .stepper li[data-state="done"] .step-dot {
   border-color: transparent;
-  background-color: rgb(var(--mdui-color-secondary-container));
-  color: rgb(var(--mdui-color-on-secondary-container));
+  background-color: rgb(var(--mdui-color-primary));
+  color: rgb(var(--mdui-color-on-primary));
 }
-.stepper li[data-state="active"] {
-  color: rgb(var(--mdui-color-on-surface));
-  background-color: rgb(var(--mdui-color-secondary-container));
-}
+.stepper li[data-state="done"] .step-dot b { display: none; }
+.stepper li[data-state="done"] .step-dot mdui-icon { display: block; }
+
+.stepper li[data-state="active"] { color: rgb(var(--mdui-color-on-surface)); }
 .stepper li[data-state="active"] .step-dot {
   border-color: transparent;
   background-color: rgb(var(--mdui-color-primary));
   color: rgb(var(--mdui-color-on-primary));
+  box-shadow: 0 0 0 .25rem rgb(var(--mdui-color-primary-container));
 }
 
 .step-panel { display: none; flex-direction: column; gap: 1.25rem; }
@@ -258,6 +286,38 @@ mdui-button.home-action::part(end-icon) { font-size: 1.5rem; opacity: .75; }
   line-height: 1.6;
 }
 .step-note mdui-icon { font-size: 1.125rem; flex: none; margin-top: .1rem; }
+
+/* ------------------------------------------- 底部操作栏（BottomAppBar） */
+/* 三个步骤的操作按钮共用一条固定在页面底部的 MD3 BottomAppBar，
+   由 stepper.js 在 <body> 上写的 data-flow-step 决定当前显示哪一组。 */
+mdui-bottom-app-bar.actions-bar {
+  height: auto;
+  min-height: 4.75rem;
+  padding: .625rem clamp(.75rem, 3vw, 1.5rem);
+  background-color: rgb(var(--mdui-color-surface-container));
+}
+.actions-inner {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: .625rem;
+  width: min(var(--oft-page-max), 100%);
+  margin-inline: auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.actions-inner::-webkit-scrollbar { display: none; }
+.actions-inner > * { flex: 0 0 auto; }
+.actions-inner [data-step] { display: none; }
+body[data-flow-step="1"] .actions-inner [data-step="1"],
+body[data-flow-step="2"] .actions-inner [data-step="2"],
+body[data-flow-step="3"] .actions-inner [data-step="3"] { display: inline-block; }
+.actions-hint {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* 核心无法被同源驱动时（file:// 等）的说明 */
 .manual-note { display: none; }
@@ -408,6 +468,8 @@ mdui-collapse-item::part(body) { padding-bottom: .5rem; }
   padding: .75rem;
   box-sizing: border-box;
 }
+/* 只有「扫码」这一步才显示接收页二维码，其余步骤一律隐藏 */
+.stage:not([data-view="link"]) .stage-linkqr { display: none !important; }
 
 .stage-empty {
   display: flex;
@@ -437,6 +499,8 @@ mdui-collapse-item::part(body) { padding-bottom: .5rem; }
 }
 .stage-status[hidden] { display: none; }
 .stage-status .status-text { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 状态条里的按钮要和文字/图标同色（mdui 默认给 standard 变体另一个颜色） */
+.stage-status mdui-button-icon { color: rgb(var(--mdui-color-inverse-on-surface)) !important; }
 
 /* 取景框装饰（接收页） */
 .stage-brackets { position: absolute; inset: 8%; pointer-events: none; display: none; }
@@ -514,7 +578,7 @@ mdui-dialog#more-dialog::part(body) {
 .more-head .more-title { font-size: var(--mdui-typescale-title-large-size); font-weight: 500; }
 .more-body { position: relative; display: flex; flex: 1 1 auto; min-height: 0; }
 .more-panels { flex: 1 1 auto; min-width: 0; overflow-y: auto; padding: 1.5rem 1.5rem 2rem 6.5rem; }
-.more-panel { display: none; flex-direction: column; gap: 1rem; max-width: 44rem; }
+.more-panel { display: none; flex-direction: column; gap: 1rem; }
 .more-panel.is-active { display: flex; }
 .more-panel:focus, .more-panel:focus-visible { outline: none; }
 .more-panel h2 { font-size: var(--mdui-typescale-title-large-size); font-weight: 500; }
@@ -603,11 +667,36 @@ mdui-dialog#more-dialog::part(body) {
   .flow-grid { grid-template-columns: minmax(0, 1fr); }
   .stage-col { position: static; order: 2; }
   .flow-col { order: 1; }
-  .stepper { flex-direction: row; overflow-x: auto; gap: .5rem; padding-bottom: .25rem; }
-  .stepper li { flex: 0 0 auto; align-items: center; padding: .375rem .75rem; }
+  /* 窄屏：步骤条变成可横滑的胶囊，去掉连接线 */
+  .stepper { gap: .5rem; overflow-x: auto; padding-bottom: .25rem; }
+  .stepper li {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    gap: .625rem;
+    padding: .375rem .875rem;
+    border-radius: var(--mdui-shape-corner-full);
+    text-align: start;
+  }
+  .stepper li::before { display: none; }
   .stepper li .step-text small { display: none; }
-  .stepper li .step-dot { margin-top: 0; }
-  /* 窄屏没有左侧导航栏的位置：所有小节改成顺序滚动 */
+  .stepper li[data-state="active"] {
+    background-color: rgb(var(--mdui-color-secondary-container));
+    color: rgb(var(--mdui-color-on-secondary-container));
+  }
+  .stepper li[data-state="active"] .step-dot { box-shadow: none; }
+  .stepper li[data-state="done"] { color: rgb(var(--mdui-color-on-surface-variant)); }
+  /* 窄屏没有左侧导航栏的位置：对话框铺满整屏，所有小节顺序滚动 */
+  /* mdui-dialog 的宿主默认有 3rem 内边距，窄屏要清掉才能真正铺满 */
+  mdui-dialog#more-dialog { padding: 0; }
+  mdui-dialog#more-dialog::part(panel) {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+  .more-head { padding: .75rem .5rem .75rem 1.25rem; }
   .more-panels { padding: 1.25rem 1.25rem 2.5rem; }
   .more-panel { display: flex; max-width: none; }
   .more-panel + .more-panel {
@@ -616,7 +705,6 @@ mdui-dialog#more-dialog::part(body) {
     border-top: 1px solid rgb(var(--mdui-color-outline-variant));
   }
   mdui-navigation-rail#more-rail { display: none; }
-  mdui-dialog#more-dialog::part(panel) { width: 100%; height: 100%; max-width: 100%; }
   .page-main { padding-bottom: 2rem; }
 }
 

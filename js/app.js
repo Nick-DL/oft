@@ -89,6 +89,23 @@
     receivePageUrl: receivePageUrl, cameraContext: cameraContext, environmentText: environmentText
   };
 
+  /* -------------------------------------------------------------- 返回首页 */
+  /* 发送页 / 接收页左上角的返回按钮：回到入口页（离开即释放摄像头） */
+  $$('#back-home').forEach(function (button) {
+    button.addEventListener('click', function () {
+      var target = './index.html';
+      try {
+        // 从首页点进来时优先用历史后退，保留滚动位置；直接打开本页则回首页
+        if (window.history.length > 1 && document.referrer &&
+          new URL(document.referrer, window.location.href).origin === window.location.origin) {
+          window.location.href = target;
+          return;
+        }
+      } catch (error) { /* 忽略 */ }
+      window.location.href = target;
+    });
+  });
+
   /* -------------------------------------------------------------- 主题按钮 */
   $$('#theme-toggle').forEach(function (button) {
     var icons = { auto: 'brightness_auto', light: 'light_mode', dark: 'dark_mode' };

@@ -89,6 +89,8 @@
   function stageView(view) {
     if (!els.stage) return;
     els.stage.dataset.view = view;
+    // 接收页二维码只在「扫码」这一步出现，切到别的步骤必须收起
+    if (els.stageQr && view !== 'link') els.stageQr.hidden = true;
     if (els.stageStatus) els.stageStatus.hidden = view !== 'frame';
   }
 
