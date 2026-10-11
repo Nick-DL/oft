@@ -46,7 +46,8 @@
     resultChecksum: $('#result-checksum'),
     saveFile: $('#save-file'),
     copyText: $('#copy-text'),
-    receiveAgain: $('#receive-again')
+    receiveAgain: $('#receive-again'),
+    shareWechat: $('#share-wechat')
   };
 
   var bridge = OFT.bridge.create({
@@ -138,6 +139,8 @@
     var done = node.querySelector('.done');
     // 文字流的结果正文放在 p.received-note 里（失败时同一个类名装的是错误说明）
     var note = node.querySelector('.received-note');
+    // 图片 / 视频预览：核心会插一个 .received 元素，图片可以走微信长按转发
+    var preview = node.querySelector('img.received');
     return {
       failed: failed,
       detail: (hint && hint.textContent ? hint.textContent.trim() : '') || (done ? done.textContent.trim() : ''),
@@ -146,6 +149,7 @@
       downloadNode: download,
       copyNode: copy || null,
       anotherNode: another || null,
+      imageSrc: !failed && preview ? (preview.currentSrc || preview.src || '') : '',
       text: !failed && note ? (note.value || note.textContent || '') : ''
     };
   }
@@ -235,6 +239,7 @@
       if (els.resultMeta) els.resultMeta.hidden = true;
       if (els.saveFile) els.saveFile.hidden = true;
       if (els.copyText) els.copyText.hidden = true;
+      if (els.shareWechat) els.shareWechat.hidden = true;
       if (els.backToScan) els.backToScan.hidden = false;
       if (els.receiveAgain) els.receiveAgain.hidden = false;
       setStatus('传输失败');
@@ -256,6 +261,19 @@
     }
     if (els.copyText) els.copyText.hidden = !result.copyNode;
     if (els.backToScan) els.backToScan.hidden = true;
+
+    // 微信里收到图片：给出「分享到微信」——长按大图即可转发（文件类型没有这条路）
+    var wechat = OFT.wechat;
+    if (els.shareWechat && wechat && wechat.isWeChat && result.imageSrc) {
+      els.shareWechat.hidden = false;
+      els.shareWechat.onclick = function () {
+        wechat.imageGuide(result.imageSrc, result.name, els.shareWechat);
+      };
+    } else if (els.shareWechat) {
+      els.shareWechat.hidden = true;
+      els.shareWechat.onclick = null;
+    }
+
     setStatus(result.detail || '接收完成');
     U.toast('接收完成' + (result.name && result.name !== '文字内容' ? '：' + shorten(result.name) : ''));
   }
@@ -308,6 +326,7 @@
     els.backToScan.addEventListener('click', function () {
       state.result = null;
       if (els.progress) els.progress.hidden = true;
+      if (els.shareWechat) els.shareWechat.hidden = true;
       flow.go(2, { force: true });
     });
   }
@@ -316,6 +335,7 @@
       state.result = null;
       state.cameraReady = false;
       if (els.progress) els.progress.hidden = true;
+      if (els.shareWechat) els.shareWechat.hidden = true;
       scanning(false);
       stageView('empty');
       setEmpty('正在重新准备…', '马上重新打开摄像头');

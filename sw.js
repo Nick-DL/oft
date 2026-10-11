@@ -28,6 +28,7 @@ var SHELL = [
   './js/home.js',
   './js/stepper.js',
   './js/core-bridge.js',
+  './js/wechat-share.js',
   './js/flow-send.js',
   './js/flow-receive.js',
   './core/index.html',

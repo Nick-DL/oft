@@ -32,15 +32,15 @@
         <div class="flow-col">
           <ol class="stepper" id="stepper" aria-label="接收步骤">
             <li data-step="1" data-state="active">
-              <span class="step-dot"><b>1</b><mdui-icon name="check" aria-hidden="true"></mdui-icon></span>
+              <span class="step-dot">1</span>
               <span class="step-text"><strong>开始</strong><small>了解流程与前提</small></span>
             </li>
             <li data-step="2" data-state="todo">
-              <span class="step-dot"><b>2</b><mdui-icon name="check" aria-hidden="true"></mdui-icon></span>
+              <span class="step-dot">2</span>
               <span class="step-text"><strong>扫码</strong><small>对准发送端屏幕</small></span>
             </li>
             <li data-step="3" data-state="todo">
-              <span class="step-dot"><b>3</b><mdui-icon name="check" aria-hidden="true"></mdui-icon></span>
+              <span class="step-dot">3</span>
               <span class="step-text"><strong>完成</strong><small>保存文件或复制文字</small></span>
             </li>
           </ol>
@@ -158,6 +158,9 @@
     <!-- 三个步骤共用一条固定在页面底部的操作栏（MD3 BottomAppBar） -->
     <mdui-bottom-app-bar class="actions-bar">
       <div class="actions-inner">
+        <!-- 微信里收到图片后才出现，且始终排在最左边 -->
+        <mdui-button data-step="3" id="share-wechat" variant="tonal" icon="share" hidden>分享到微信</mdui-button>
+
         <mdui-button data-step="1" id="start-scan" variant="filled" icon="videocam">开始扫描</mdui-button>
         <mdui-button data-step="1" variant="text" icon="open_in_new" href="./core/receive.html" target="_blank" rel="noopener">独立打开核心接收端</mdui-button>
 
@@ -174,6 +177,7 @@
     <script src="./js/app.js"></script>
     <script src="./js/stepper.js"></script>
     <script src="./js/core-bridge.js"></script>
+    <script src="./js/wechat-share.js"></script>
     <script src="./js/flow-receive.js"></script>
   </body>
 </html>

@@ -294,6 +294,8 @@
     '#result button.text-button{background:transparent !important;color:rgb(var(--mdui-color-inverse-primary)) !important;',
     'font-weight:500 !important;letter-spacing:0 !important;text-transform:none !important;font-size:.95rem !important}',
     '#result .note-actions{display:flex !important;flex-wrap:wrap !important;gap:.625rem !important;justify-content:center !important}',
+    // 「保存文件」「再接收一个」由外壳的底部操作栏负责，舞台里不再重复显示
+    '#result a.download,#result .note-actions.pair{display:none !important}',
     '#result pre,#result .snippet{max-width:100% !important;max-height:38vh !important;overflow:auto !important;',
     'padding:.875rem 1rem !important;border-radius:.75rem !important;background:rgba(255,255,255,.08) !important;',
     'color:#fff !important;font-size:.85rem !important;line-height:1.6 !important;white-space:pre-wrap !important;word-break:break-word !important}'

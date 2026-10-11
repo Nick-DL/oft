@@ -32,15 +32,15 @@
         <div class="flow-col">
           <ol class="stepper" id="stepper" aria-label="发送步骤">
             <li data-step="1" data-state="active">
-              <span class="step-dot"><b>1</b><mdui-icon name="check" aria-hidden="true"></mdui-icon></span>
+              <span class="step-dot">1</span>
               <span class="step-text"><strong>选择内容</strong><small>文件或一段文字</small></span>
             </li>
             <li data-step="2" data-state="todo">
-              <span class="step-dot"><b>2</b><mdui-icon name="check" aria-hidden="true"></mdui-icon></span>
+              <span class="step-dot">2</span>
               <span class="step-text"><strong>对端打开接收页</strong><small>扫码或输入网址</small></span>
             </li>
             <li data-step="3" data-state="todo">
-              <span class="step-dot"><b>3</b><mdui-icon name="check" aria-hidden="true"></mdui-icon></span>
+              <span class="step-dot">3</span>
               <span class="step-text"><strong>对准屏幕扫描</strong><small>展示二维码并等待</small></span>
             </li>
           </ol>
@@ -125,6 +125,13 @@
               <mdui-icon name="videocam" aria-hidden="true"></mdui-icon>
               <span>接收端必须允许摄像头：只有 <b>https://</b> 或 <b>http://localhost</b> 打开时浏览器才会授权；局域网 http 地址会被拒绝。</span>
             </div>
+
+            <!-- 只在微信内置浏览器里显示：把本页（接收页）分享给对面的手机 -->
+            <div class="wechat-share-block" data-wechat-only hidden>
+              <mdui-icon name="share" aria-hidden="true"></mdui-icon>
+              <span class="wechat-share-text">当前在微信里打开：可以把接收页发给对方，他点开就能进接收页。</span>
+              <mdui-button variant="tonal" icon="share" data-wechat-link>分享到微信</mdui-button>
+            </div>
           </section>
 
           <!-- 第 3 步：展示二维码 -->
@@ -137,54 +144,70 @@
 
             <div class="step-note">
               <mdui-icon name="tips_and_updates" aria-hidden="true"></mdui-icon>
-              <span>把这块屏幕亮度调到最高、手机固定住、让二维码尽量占满取景框。传得慢可以点「传输设置」调低每帧字节数或帧率。</span>
+              <span>把这块屏幕亮度调到最高、手机固定住、让二维码尽量占满取景框。传得慢可以在下面的「传输设置」里调低每帧字节数或帧率。</span>
             </div>
 
-            <dl class="kv-list" id="stream-specs" hidden>
-              <div class="kv"><dt>帧率</dt><dd id="spec-fps">—</dd></div>
-              <div class="kv"><dt>每帧字节</dt><dd id="spec-frame">—</dd></div>
-              <div class="kv"><dt>二维码</dt><dd id="spec-qr">—</dd></div>
-              <div class="kv"><dt>发送量</dt><dd id="spec-payload">—</dd></div>
-              <div class="kv"><dt>压缩</dt><dd id="spec-compression">—</dd></div>
-              <div class="kv"><dt>喷泉块 K</dt><dd id="spec-k">—</dd></div>
-            </dl>
+            <!-- 传输设置：始终展开（双排文字列表项做标题） -->
+            <section class="settings-block" aria-labelledby="settings-title">
+              <mdui-list class="section-list">
+                <mdui-list-item nonclickable id="settings-title">
+                  传输设置
+                  <span slot="description">传得慢就调这里：帧率、每帧字节、屏上码数、纠错等级</span>
+                  <mdui-icon slot="icon" name="tune" aria-hidden="true"></mdui-icon>
+                </mdui-list-item>
+              </mdui-list>
+              <div class="settings-grid">
+                <mdui-select id="cfg-fps" label="帧率 fps" value="60">
+                  <mdui-menu-item value="10">10</mdui-menu-item>
+                  <mdui-menu-item value="15">15</mdui-menu-item>
+                  <mdui-menu-item value="20">20</mdui-menu-item>
+                  <mdui-menu-item value="24">24</mdui-menu-item>
+                  <mdui-menu-item value="30">30</mdui-menu-item>
+                  <mdui-menu-item value="55">55</mdui-menu-item>
+                  <mdui-menu-item value="60">60</mdui-menu-item>
+                </mdui-select>
+                <mdui-select id="cfg-bytes" label="每帧字节" value="2953">
+                  <mdui-menu-item value="500">500</mdui-menu-item>
+                  <mdui-menu-item value="1000">1000</mdui-menu-item>
+                  <mdui-menu-item value="1465">1465</mdui-menu-item>
+                  <mdui-menu-item value="1850">1850</mdui-menu-item>
+                  <mdui-menu-item value="2331">2331</mdui-menu-item>
+                  <mdui-menu-item value="2953">2953</mdui-menu-item>
+                </mdui-select>
+                <mdui-select id="cfg-grid" label="屏上码数" value="1">
+                  <mdui-menu-item value="1">1 个</mdui-menu-item>
+                  <mdui-menu-item value="2">2 个（1×2）</mdui-menu-item>
+                  <mdui-menu-item value="4">4 个（2×2）</mdui-menu-item>
+                  <mdui-menu-item value="6">6 个（2×3）</mdui-menu-item>
+                </mdui-select>
+                <mdui-select id="cfg-ecc" label="纠错等级" value="L">
+                  <mdui-menu-item value="L">L（最低，最快）</mdui-menu-item>
+                  <mdui-menu-item value="M">M</mdui-menu-item>
+                  <mdui-menu-item value="Q">Q</mdui-menu-item>
+                  <mdui-menu-item value="H">H（最高，最慢）</mdui-menu-item>
+                </mdui-select>
+              </div>
+              <p class="oft-small oft-muted">
+                改动会立即重新开始发送。传得慢时先把「每帧字节」降到 1000、帧率降到 20–30；屏幕越亮、镜头越稳、距离越近，恢复越快。
+              </p>
+            </section>
 
-            <mdui-collapse id="advanced-settings">
-              <mdui-collapse-item value="settings" header="传输设置（传得慢就调这里）">
-                <div class="settings-grid">
-                  <mdui-select id="cfg-fps" label="帧率 fps" value="60">
-                    <mdui-menu-item value="10">10</mdui-menu-item>
-                    <mdui-menu-item value="15">15</mdui-menu-item>
-                    <mdui-menu-item value="20">20</mdui-menu-item>
-                    <mdui-menu-item value="24">24</mdui-menu-item>
-                    <mdui-menu-item value="30">30</mdui-menu-item>
-                    <mdui-menu-item value="55">55</mdui-menu-item>
-                    <mdui-menu-item value="60">60</mdui-menu-item>
-                  </mdui-select>
-                  <mdui-select id="cfg-bytes" label="每帧字节" value="2953">
-                    <mdui-menu-item value="500">500</mdui-menu-item>
-                    <mdui-menu-item value="1000">1000</mdui-menu-item>
-                    <mdui-menu-item value="1465">1465</mdui-menu-item>
-                    <mdui-menu-item value="1850">1850</mdui-menu-item>
-                    <mdui-menu-item value="2331">2331</mdui-menu-item>
-                    <mdui-menu-item value="2953">2953</mdui-menu-item>
-                  </mdui-select>
-                  <mdui-select id="cfg-grid" label="屏上码数" value="1">
-                    <mdui-menu-item value="1">1 个</mdui-menu-item>
-                    <mdui-menu-item value="2">2 个（1×2）</mdui-menu-item>
-                    <mdui-menu-item value="4">4 个（2×2）</mdui-menu-item>
-                    <mdui-menu-item value="6">6 个（2×3）</mdui-menu-item>
-                  </mdui-select>
-                  <mdui-select id="cfg-ecc" label="纠错等级" value="L">
-                    <mdui-menu-item value="L">L（最低，最快）</mdui-menu-item>
-                    <mdui-menu-item value="M">M</mdui-menu-item>
-                    <mdui-menu-item value="Q">Q</mdui-menu-item>
-                    <mdui-menu-item value="H">H（最高，最慢）</mdui-menu-item>
-                  </mdui-select>
-                </div>
-                <p class="oft-small oft-muted" style="margin-top: 0.75rem">
-                  改动会立即重新开始发送。传得慢时先把「每帧字节」降到 1000、帧率降到 20–30；屏幕越亮、镜头越稳、距离越近，恢复越快。
-                </p>
+            <!-- 数据流参数：次要信息，收进折叠面板 -->
+            <mdui-collapse id="advanced-specs">
+              <mdui-collapse-item value="specs">
+                <mdui-list-item slot="header" nonclickable>
+                  数据流参数
+                  <span slot="description">当前二维码的帧率、规格、压缩与喷泉块</span>
+                  <mdui-icon slot="icon" name="insights" aria-hidden="true"></mdui-icon>
+                </mdui-list-item>
+                <dl class="kv-list" id="stream-specs" hidden>
+                  <div class="kv"><dt>帧率</dt><dd id="spec-fps">—</dd></div>
+                  <div class="kv"><dt>每帧字节</dt><dd id="spec-frame">—</dd></div>
+                  <div class="kv"><dt>二维码</dt><dd id="spec-qr">—</dd></div>
+                  <div class="kv"><dt>发送量</dt><dd id="spec-payload">—</dd></div>
+                  <div class="kv"><dt>压缩</dt><dd id="spec-compression">—</dd></div>
+                  <div class="kv"><dt>喷泉块 K</dt><dd id="spec-k">—</dd></div>
+                </dl>
               </mdui-collapse-item>
             </mdui-collapse>
           </section>
@@ -237,6 +260,7 @@
     <script src="./js/app.js"></script>
     <script src="./js/stepper.js"></script>
     <script src="./js/core-bridge.js"></script>
+    <script src="./js/wechat-share.js"></script>
     <script src="./js/flow-send.js"></script>
   </body>
 </html>

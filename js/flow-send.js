@@ -287,22 +287,37 @@
     });
   }
 
+  /* 把核心的流参数镜像到页面上；参数一变（改设置、换布局、重开传输）就跟着刷新 */
+  var SPEC_MAP = {
+    fps: '#spec-fps', frame: '#spec-frame', qr: '#spec-qr',
+    payload: '#spec-payload', compression: '#spec-compression', k: '#spec-k'
+  };
+
+  function applyStreamSpecs() {
+    if (!els.streamSpecs || state.manual) return false;
+    var filled = 0;
+    Object.keys(SPEC_MAP).forEach(function (key) {
+      var value = bridge.text(SPEC_MAP[key]);
+      if (!value || value === '—') return;
+      filled++;
+      if (els.spec[key] && els.spec[key].textContent !== value) els.spec[key].textContent = value;
+    });
+    if (filled) els.streamSpecs.hidden = false;
+    return filled > 0;
+  }
+
   function readStreamSpecs() {
     if (!els.streamSpecs || state.manual) return;
-    bridge.waitUntil(function () {
-      var node = bridge.find('#stream-specs');
-      return node && !node.hidden;
-    }, 8000, 200).then(function () {
-      var map = {
-        fps: '#spec-fps', frame: '#spec-frame', qr: '#spec-qr',
-        payload: '#spec-payload', compression: '#spec-compression', k: '#spec-k'
-      };
-      Object.keys(map).forEach(function (key) {
-        var value = bridge.text(map[key]);
-        if (els.spec[key] && value) els.spec[key].textContent = value;
-      });
-      els.streamSpecs.hidden = false;
-    }, function () { /* 核心没给出参数时保持占位符 */ });
+    // 核心要先锁定第一帧才有参数，等它出现；之后交给 MutationObserver 持续跟随
+    bridge.waitUntil(function () { return applyStreamSpecs(); }, 10000, 200)
+      .catch(function () { /* 核心没给出参数时保持占位符 */ });
+  }
+
+  function watchStreamSpecs() {
+    if (!els.streamSpecs || state.manual) return;
+    readStreamSpecs();
+    // 核心每次重排/改参数都会重写 #stream-specs 里的节点，这里跟着更新
+    bridge.observe('#stream-specs', function () { applyStreamSpecs(); });
   }
 
   function mirrorStatus() {
@@ -315,7 +330,7 @@
     if (!bridge.available()) return;
     mirrorStatus();
     bridge.observe('#specs', function () { mirrorStatus(); });
-    readStreamSpecs();
+    watchStreamSpecs();
   });
 
   /* ------------------------------------------------- 传输设置 → 核心 */
@@ -326,7 +341,14 @@
       var value = control.value;
       if (value === undefined || value === null || value === '') return;
       var ok = bridge.setValue(selector, String(value));
-      if (!ok) U.toast('设置没能传给核心页面');
+      if (!ok) {
+        U.toast('设置没能传给核心页面');
+        return;
+      }
+      // 核心会按新参数重排数据流，参数面板跟着刷新（先立即读一次，再等重排完成读一次）
+      applyStreamSpecs();
+      window.setTimeout(applyStreamSpecs, 400);
+      window.setTimeout(applyStreamSpecs, 1200);
     });
   }
   pushSetting('fps', '#cfg-fps');
@@ -390,7 +412,7 @@
           window.setTimeout(function () { bridge.dispatchResize(); }, 260);
           window.setTimeout(function () { bridge.dispatchResize(); }, 900);
           mirrorStatus();
-          readStreamSpecs();
+          watchStreamSpecs();
           if (els.stageCaption) {
             els.stageCaption.textContent = '接收端正在读取这块屏幕上的二维码，请保持屏幕常亮、亮度最高。';
           }

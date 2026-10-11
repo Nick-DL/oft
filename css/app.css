@@ -180,82 +180,57 @@ mdui-button.home-action::part(end-icon) { font-size: 1.5rem; opacity: .75; }
 }
 .flow-col { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
 
-/* 步骤条：电脑上一排三步（带连接线），窄屏是可横滑的胶囊 */
+/* 步骤条：保留初版样式（圆点 + 标题/说明 + 选中胶囊），电脑上三个 li 横向排开 */
 .stepper {
   display: flex;
-  gap: .25rem;
+  flex-direction: row;
+  gap: .5rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 .stepper li {
-  position: relative;
   display: flex;
+  align-items: flex-start;
+  gap: .875rem;
   flex: 1 1 0;
   min-width: 0;
-  flex-direction: column;
-  align-items: center;
-  gap: .5rem;
-  padding: .875rem .75rem;
-  text-align: center;
+  padding: .625rem .875rem;
+  border-radius: var(--mdui-shape-corner-large);
   color: rgb(var(--mdui-color-on-surface-variant));
+  transition: background-color var(--mdui-motion-duration-short4) var(--mdui-motion-easing-standard),
+    color var(--mdui-motion-duration-short4) var(--mdui-motion-easing-standard);
 }
-/* 步骤之间的连接线（从上一项中线拉过来，末端给圆点留空） */
-.stepper li::before {
-  content: "";
-  position: absolute;
-  top: 1.6875rem;
-  right: 50%;
-  left: 0;
-  height: .125rem;
-  margin-right: 1.375rem;
-  border-radius: .0625rem;
-  background-color: rgb(var(--mdui-color-outline-variant));
-  transition: background-color var(--mdui-motion-duration-medium2) var(--mdui-motion-easing-standard);
-}
-.stepper li:first-child::before { display: none; }
-.stepper li[data-state="done"]::before,
-.stepper li[data-state="active"]::before { background-color: rgb(var(--mdui-color-primary)); }
-
 .stepper li .step-dot {
-  position: relative;
-  z-index: 1;
   display: grid;
   place-items: center;
   flex: none;
   width: 1.75rem;
   height: 1.75rem;
+  margin-top: .1rem;
   border-radius: var(--mdui-shape-corner-full);
   border: 1px solid rgb(var(--mdui-color-outline));
-  background-color: rgb(var(--mdui-color-surface));
   font-size: var(--mdui-typescale-label-large-size);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-  transition: background-color var(--mdui-motion-duration-medium2) var(--mdui-motion-easing-standard),
-    border-color var(--mdui-motion-duration-medium2) var(--mdui-motion-easing-standard),
-    color var(--mdui-motion-duration-medium2) var(--mdui-motion-easing-standard);
 }
-.stepper li .step-dot b { font-weight: 500; }
-.stepper li .step-dot mdui-icon { display: none; font-size: 1.125rem; }
 .stepper li .step-text { display: flex; flex-direction: column; min-width: 0; }
 .stepper li .step-text strong { font-weight: 500; font-size: var(--mdui-typescale-body-large-size); }
 .stepper li .step-text small { font-size: var(--mdui-typescale-body-small-size); opacity: .8; }
-
 .stepper li[data-state="done"] { color: rgb(var(--mdui-color-on-surface)); }
 .stepper li[data-state="done"] .step-dot {
   border-color: transparent;
-  background-color: rgb(var(--mdui-color-primary));
-  color: rgb(var(--mdui-color-on-primary));
+  background-color: rgb(var(--mdui-color-secondary-container));
+  color: rgb(var(--mdui-color-on-secondary-container));
 }
-.stepper li[data-state="done"] .step-dot b { display: none; }
-.stepper li[data-state="done"] .step-dot mdui-icon { display: block; }
-
-.stepper li[data-state="active"] { color: rgb(var(--mdui-color-on-surface)); }
+.stepper li[data-state="active"] {
+  color: rgb(var(--mdui-color-on-surface));
+  background-color: rgb(var(--mdui-color-secondary-container));
+}
 .stepper li[data-state="active"] .step-dot {
   border-color: transparent;
   background-color: rgb(var(--mdui-color-primary));
   color: rgb(var(--mdui-color-on-primary));
-  box-shadow: 0 0 0 .25rem rgb(var(--mdui-color-primary-container));
 }
 
 .step-panel { display: none; flex-direction: column; gap: 1.25rem; }
@@ -319,6 +294,105 @@ body[data-flow-step="3"] .actions-inner [data-step="3"] { display: inline-block;
   white-space: nowrap;
 }
 
+/* ------------------------------------------- 微信内置浏览器的分享引导 */
+/* 只在微信里显示的区块（发送页第 2 步：把接收页链接发给对方） */
+.wechat-share-block {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .625rem .875rem;
+  padding: .75rem .875rem;
+  border-radius: var(--mdui-shape-corner-large);
+  background-color: rgb(var(--mdui-color-secondary-container));
+  color: rgb(var(--mdui-color-on-secondary-container));
+}
+.wechat-share-block > mdui-icon { font-size: 1.25rem; flex: none; }
+.wechat-share-text { flex: 1 1 12rem; min-width: 0; font-size: var(--mdui-typescale-body-medium-size); }
+
+.share-guide {
+  position: fixed;
+  inset: 0;
+  z-index: 2600;
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  background-color: rgba(var(--mdui-color-scrim), .74);
+  overflow: auto;
+}
+.share-guide[hidden] { display: none !important; }
+.share-guide-pointer {
+  position: absolute;
+  top: .75rem;
+  right: 1rem;
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: var(--mdui-shape-corner-full);
+  background-color: rgb(var(--mdui-color-primary));
+  color: rgb(var(--mdui-color-on-primary));
+  font-size: 2rem;
+  box-shadow: var(--mdui-elevation-level3);
+  animation: oft-point-hint 1.4s var(--mdui-motion-easing-standard) infinite;
+}
+@keyframes oft-point-hint {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-.25rem, .25rem) scale(1.06); }
+}
+.share-guide-card {
+  margin-top: 4.5rem;
+  width: min(24rem, 100%);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: .625rem;
+  border-radius: var(--mdui-shape-corner-extra-large);
+  background-color: rgb(var(--mdui-color-surface-container-high));
+  box-shadow: var(--mdui-elevation-level3);
+}
+.share-guide-card:focus, .share-guide-card:focus-visible { outline: none; }
+.share-guide-card strong { font-size: var(--mdui-typescale-title-large-size); font-weight: 500; }
+.share-guide-card p { color: rgb(var(--mdui-color-on-surface-variant)); }
+.share-guide-actions { display: flex; flex-wrap: wrap; gap: .625rem; justify-content: flex-end; }
+
+/* 分享收到的图片：铺一张大图，长按图上的手指提示 */
+.share-guide--image { align-items: center; justify-content: center; }
+.share-guide-image-card { margin-top: 0; width: min(28rem, 100%); max-height: calc(100dvh - 2rem); }
+.share-guide-image-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: var(--mdui-shape-corner-large);
+  background-color: rgb(var(--mdui-color-surface-container-highest));
+  overflow: hidden;
+}
+.share-guide-image {
+  display: block;
+  max-width: 100%;
+  max-height: min(62dvh, 32rem);
+  object-fit: contain;
+}
+.share-guide-touch {
+  position: absolute;
+  right: .75rem;
+  bottom: .75rem;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--mdui-shape-corner-full);
+  background-color: rgba(var(--mdui-color-inverse-surface), .82);
+  color: rgb(var(--mdui-color-inverse-on-surface));
+  font-size: 1.5rem;
+  animation: oft-press-hint 1.6s var(--mdui-motion-easing-standard) infinite;
+}
+@keyframes oft-press-hint {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(.82); }
+  60% { transform: scale(1.05); }
+}
+
 /* 核心无法被同源驱动时（file:// 等）的说明 */
 .manual-note { display: none; }
 body.is-manual .manual-note { display: flex; }
@@ -330,12 +404,9 @@ body.is-manual #pane-snippet { display: none; }
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
   gap: .75rem 1rem;
-  margin-top: .75rem;
 }
 mdui-collapse-item::part(body) { padding-bottom: .5rem; }
-
-/* 键值行不要拉满整列，否则标签与取值离得太远 */
-#stream-specs, #result-meta { max-width: 34rem; }
+.settings-block .settings-grid { margin-top: .25rem; }
 
 /* 要点清单（接收端第 1 步） */
 .check-list {
@@ -595,6 +666,23 @@ mdui-dialog#more-dialog::part(body) {
 .fact strong { display: block; font-size: var(--mdui-typescale-title-medium-size); font-weight: 500; }
 .fact span { font-size: var(--mdui-typescale-body-small-size); color: rgb(var(--mdui-color-on-surface-variant)); }
 
+/* 传输设置（始终展开）：双排文字列表项做标题 + 参数网格 */
+.settings-block {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  padding: .5rem .75rem 1rem;
+  border-radius: var(--mdui-shape-corner-large);
+  background-color: rgb(var(--mdui-color-surface-container-low));
+}
+.settings-block .section-list { margin-inline: -.5rem; }
+.settings-block > p { margin: .25rem .25rem 0; }
+
+/* 折叠面板的标题也用双排文字列表项，和设置区保持一致 */
+mdui-collapse-item::part(header) { padding: 0; }
+mdui-collapse-item mdui-list-item[slot="header"] { width: 100%; }
+
+/* 键值行按容器宽度铺满 */
 .kv-list { display: flex; flex-direction: column; gap: .5rem; }
 .kv {
   display: flex;
@@ -667,25 +755,17 @@ mdui-dialog#more-dialog::part(body) {
   .flow-grid { grid-template-columns: minmax(0, 1fr); }
   .stage-col { position: static; order: 2; }
   .flow-col { order: 1; }
-  /* 窄屏：步骤条变成可横滑的胶囊，去掉连接线 */
-  .stepper { gap: .5rem; overflow-x: auto; padding-bottom: .25rem; }
+  /* 窄屏：步骤条变成可横滑的胶囊 */
+  .stepper { gap: .375rem; overflow-x: auto; padding-bottom: .25rem; }
   .stepper li {
     flex: 0 0 auto;
-    flex-direction: row;
     align-items: center;
     gap: .625rem;
     padding: .375rem .875rem;
     border-radius: var(--mdui-shape-corner-full);
-    text-align: start;
   }
-  .stepper li::before { display: none; }
+  .stepper li .step-dot { margin-top: 0; }
   .stepper li .step-text small { display: none; }
-  .stepper li[data-state="active"] {
-    background-color: rgb(var(--mdui-color-secondary-container));
-    color: rgb(var(--mdui-color-on-secondary-container));
-  }
-  .stepper li[data-state="active"] .step-dot { box-shadow: none; }
-  .stepper li[data-state="done"] { color: rgb(var(--mdui-color-on-surface-variant)); }
   /* 窄屏没有左侧导航栏的位置：对话框铺满整屏，所有小节顺序滚动 */
   /* mdui-dialog 的宿主默认有 3rem 内边距，窄屏要清掉才能真正铺满 */
   mdui-dialog#more-dialog { padding: 0; }
