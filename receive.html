@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN" class="mdui-theme-auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>接收 · 光学传输</title>
+    <meta name="description" content="用摄像头读取另一台设备屏幕上的二维码，在本机还原出文件或文字。全程不联网，结果只保存在本机。" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#01796F" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d1513" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icons/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <link rel="stylesheet" href="./vendor/mdui/mdui.css" />
+    <link rel="stylesheet" href="./css/app.css" />
+    <script src="./vendor/mdui/mdui.global.js"></script>
+    <script src="./js/theme.js"></script>
+  </head>
+  <body class="oft-page oft-receive">
+    <mdui-top-app-bar class="app-bar">
+      <mdui-button-icon id="back-home" icon="arrow_back" aria-label="返回首页"></mdui-button-icon>
+      <mdui-top-app-bar-title>接收</mdui-top-app-bar-title>
+      <div class="oft-spacer"></div>
+      <mdui-tooltip content="切换外观（跟随系统 / 浅色 / 深色）">
+        <mdui-button-icon id="theme-toggle" icon="brightness_auto" aria-label="切换外观"></mdui-button-icon>
+      </mdui-tooltip>
+    </mdui-top-app-bar>
+
+    <main class="page-main">
+      <div class="flow-grid">
+        <div class="flow-col">
+          <ol class="stepper" id="stepper" aria-label="接收步骤">
+            <li data-step="1" data-state="active">
+              <span class="step-dot">1</span>
+              <span class="step-text"><strong>开始</strong><small>了解流程与前提</small></span>
+            </li>
+            <li data-step="2" data-state="todo">
+              <span class="step-dot">2</span>
+              <span class="step-text"><strong>扫码</strong><small>对准发送端屏幕</small></span>
+            </li>
+            <li data-step="3" data-state="todo">
+              <span class="step-dot">3</span>
+              <span class="step-text"><strong>完成</strong><small>保存文件或复制文字</small></span>
+            </li>
+          </ol>
+
+          <!-- 第 1 步：说明 + 开始 -->
+          <section class="step-panel is-active" data-step="1" aria-labelledby="recv-step1-title">
+            <header class="step-head">
+              <p class="oft-overline">第 1 步 / 共 3 步</p>
+              <h1 id="recv-step1-title">用摄像头把内容读回来</h1>
+              <p>另一台设备正在把文件或文字显示成一串不断变化的二维码。本机用摄像头读取，在本机还原，不上传任何数据。</p>
+            </header>
+
+            <mdui-card variant="filled" class="step-card">
+              <ul class="check-list">
+                <li>
+                  <mdui-icon name="photo_camera" aria-hidden="true"></mdui-icon>
+                  <span>需要摄像头权限：浏览器只在 <b>https://</b> 或 <b>http://localhost</b> 下授权，局域网 http 地址会被拒绝。</span>
+                </li>
+                <li>
+                  <mdui-icon name="brightness_high" aria-hidden="true"></mdui-icon>
+                  <span>把发送端屏幕亮度调到最高，手机固定住，让二维码尽量占满取景框。</span>
+                </li>
+                <li>
+                  <mdui-icon name="verified" aria-hidden="true"></mdui-icon>
+                  <span>接收完成后会自动做 SHA-256 校验，损坏的文件不会被保存。</span>
+                </li>
+                <li>
+                  <mdui-icon name="sync_alt" aria-hidden="true"></mdui-icon>
+                  <span>两端必须是同一代核心（当前 v0.5.3）；v0.3.0 / v0.4.x 与它不互通。</span>
+                </li>
+              </ul>
+            </mdui-card>
+
+            <div class="step-note manual-note" id="manual-note" hidden>
+              <mdui-icon name="info" aria-hidden="true"></mdui-icon>
+              <span>
+                当前环境（<span class="oft-mono" id="manual-reason">file:// 或跨源</span>）不允许本页自动驱动核心，
+                已切换为手动模式：请在右侧核心页面里点「启动摄像头」。
+              </span>
+            </div>
+
+            <div class="step-actions">
+              <mdui-button id="start-scan" variant="filled" icon="videocam">开始扫描</mdui-button>
+              <mdui-button variant="text" icon="open_in_new" href="./core/receive.html" target="_blank" rel="noopener">独立打开核心接收端</mdui-button>
+            </div>
+            <p class="oft-small oft-muted">摄像头画面只在本机处理；二维码内容未加密，请不要用光学链路传机密信息。</p>
+          </section>
+
+          <!-- 第 2 步：扫码 -->
+          <section class="step-panel" data-step="2" aria-labelledby="recv-step2-title">
+            <header class="step-head">
+              <p class="oft-overline">第 2 步 / 共 3 步</p>
+              <h1 id="recv-step2-title">对准发送端屏幕上的二维码</h1>
+              <p id="scan-status">正在启动摄像头…</p>
+            </header>
+
+            <div class="step-note">
+              <mdui-icon name="tips_and_updates" aria-hidden="true"></mdui-icon>
+              <span>进度条纹丝不动时：把发送端的「每帧字节」降到 1000 左右、帧率降到 20–30，再试一次；距离 20–40 厘米通常最稳。</span>
+            </div>
+
+            <div class="step-actions">
+              <mdui-button id="retry-camera" variant="tonal" icon="refresh" hidden>重新启动摄像头</mdui-button>
+              <mdui-button id="back-step-1" variant="text" icon="arrow_back">返回说明</mdui-button>
+            </div>
+          </section>
+
+          <!-- 第 3 步：完成 -->
+          <section class="step-panel" data-step="3" aria-labelledby="recv-step3-title">
+            <div class="success-hero" id="success-hero">
+              <mdui-icon name="check_circle" id="result-icon" aria-hidden="true"></mdui-icon>
+              <h1 id="recv-step3-title">接收成功</h1>
+              <p id="result-detail">正在整理结果…</p>
+            </div>
+
+            <dl class="kv-list" id="result-meta" hidden>
+              <div class="kv"><dt>内容</dt><dd id="result-name">—</dd></div>
+              <div class="kv"><dt>大小</dt><dd id="result-size">—</dd></div>
+              <div class="kv"><dt>校验</dt><dd id="result-checksum">—</dd></div>
+            </dl>
+
+            <div class="step-actions">
+              <mdui-button id="save-file" variant="filled" icon="download" hidden>保存文件</mdui-button>
+              <mdui-button id="copy-text" variant="tonal" icon="content_copy" hidden>复制文字</mdui-button>
+              <mdui-button id="receive-again" variant="outlined" icon="restart_alt">再接收一个</mdui-button>
+              <mdui-button id="back-to-scan" variant="text" icon="arrow_back" hidden>重新扫描</mdui-button>
+            </div>
+          </section>
+        </div>
+
+        <aside class="stage-col">
+          <div class="stage" id="stage" data-view="empty" data-scan="off">
+            <div class="stage-frame">
+              <iframe
+                id="core-frame"
+                class="core-frame"
+                title="光学传输核心（接收端）"
+                allow="camera; clipboard-write; fullscreen; screen-wake-lock"
+                referrerpolicy="no-referrer"
+              ></iframe>
+            </div>
+            <div class="stage-brackets" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+            <div class="stage-scanline" aria-hidden="true"></div>
+            <div class="stage-empty" id="stage-empty">
+              <mdui-icon name="qr_code_scanner" aria-hidden="true"></mdui-icon>
+              <strong id="stage-empty-title">摄像头画面会显示在这里</strong>
+              <span class="oft-small" id="stage-empty-text">点「开始扫描」后浏览器会请求摄像头权限</span>
+            </div>
+
+            <div class="stage-status" id="stage-status" hidden>
+              <mdui-icon name="sensors" aria-hidden="true" style="font-size: 1.05rem"></mdui-icon>
+              <span class="status-text" id="stage-status-text">准备中…</span>
+              <mdui-button-icon id="stage-fullscreen" icon="fullscreen" aria-label="全屏取景"></mdui-button-icon>
+            </div>
+
+            <div class="stage-progress" id="stage-progress" hidden>
+              <div class="row">
+                <span id="progress-label">0%</span>
+                <span id="progress-eta">正在估算…</span>
+              </div>
+              <mdui-linear-progress id="progress-bar" value="0" max="100"></mdui-linear-progress>
+            </div>
+          </div>
+          <p class="oft-small oft-muted" id="stage-caption">
+            画面只在本机解码；进度到 100% 后会校验 SHA-256 才交付结果。
+          </p>
+        </aside>
+      </div>
+    </main>
+
+    <script src="./js/app.js"></script>
+    <script src="./js/stepper.js"></script>
+    <script src="./js/core-bridge.js"></script>
+    <script src="./js/flow-receive.js"></script>
+  </body>
+</html>

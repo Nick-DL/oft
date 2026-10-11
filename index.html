@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="zh-CN" class="mdui-theme-auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>光学传输 · 屏幕 → 摄像头 · 离线传文件</title>
+    <meta
+      name="description"
+      content="把文件或文字编码成一串不断变化的二维码显示在屏幕上，另一台设备用摄像头扫描还原。全程没有服务器、没有网络，只走光和镜头。基于 Decimen Optical Transfer v0.5.3。"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#01796F" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d1513" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="光学传输" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icons/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <link rel="stylesheet" href="./vendor/mdui/mdui.css" />
+    <link rel="stylesheet" href="./css/app.css" />
+    <script src="./vendor/mdui/mdui.global.js"></script>
+    <script src="./js/theme.js"></script>
+  </head>
+  <body class="oft-page oft-home">
+    <mdui-top-app-bar class="app-bar">
+      <mdui-top-app-bar-title>光学传输</mdui-top-app-bar-title>
+      <div class="oft-spacer"></div>
+      <mdui-tooltip content="切换外观（跟随系统 / 浅色 / 深色）">
+        <mdui-button-icon id="theme-toggle" icon="brightness_auto" aria-label="切换外观"></mdui-button-icon>
+      </mdui-tooltip>
+    </mdui-top-app-bar>
+
+    <main class="page-main">
+      <div class="home-grid">
+        <section class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <mdui-icon name="qr_code_2"></mdui-icon>
+          </span>
+          <p class="oft-overline">Wire v3 · 光学二维码 · 纯离线</p>
+          <h1>把文件“照”过去</h1>
+          <p>
+            发送端的屏幕上滚动着一串二维码，接收端用摄像头读取，在本机还原出原始内容。
+            没有服务器、没有账号、没有网络——数据只走光和镜头。
+          </p>
+          <div class="brand-chips">
+            <span><mdui-icon name="wifi_off" style="font-size: 1rem"></mdui-icon>不联网</span>
+            <span><mdui-icon name="shield" style="font-size: 1rem"></mdui-icon>不加密·勿传机密</span>
+            <span><mdui-icon name="sd_storage" style="font-size: 1rem"></mdui-icon>单文件 64 MB</span>
+            <span><mdui-icon name="grid_view" style="font-size: 1rem"></mdui-icon>最多 6 码同屏</span>
+          </div>
+        </section>
+
+        <section class="home-actions" aria-label="开始使用">
+          <mdui-button id="go-send" class="home-action" variant="filled" full-width>
+            <mdui-icon slot="icon" name="upload_file"></mdui-icon>
+            <span class="home-action-text">
+              <strong>发送</strong>
+              <small>选好文件或文字，屏幕变成二维码</small>
+            </span>
+            <mdui-icon slot="end-icon" name="arrow_forward"></mdui-icon>
+          </mdui-button>
+
+          <mdui-button id="go-receive" class="home-action" variant="tonal" full-width>
+            <mdui-icon slot="icon" name="qr_code_scanner"></mdui-icon>
+            <span class="home-action-text">
+              <strong>接收</strong>
+              <small>打开摄像头，对准发送端的屏幕</small>
+            </span>
+            <mdui-icon slot="end-icon" name="arrow_forward"></mdui-icon>
+          </mdui-button>
+
+          <mdui-button id="open-more" class="home-more" variant="text" icon="more_horiz">更多</mdui-button>
+        </section>
+      </div>
+    </main>
+
+    <footer class="page-foot">
+      <span>光学传输 · 传输核心 Decimen Optical Transfer v0.5.3（AGPL-3.0-or-later）</span>
+      <span>数据不经过网络，二维码内容未加密，请勿用于机密信息。</span>
+    </footer>
+
+    <!-- 「更多」：左侧 NavigationRail + 右侧内容 -->
+    <mdui-dialog id="more-dialog" aria-label="关于光学传输" close-on-esc close-on-overlay-click>
+      <div class="more-layout">
+        <header class="more-head">
+          <span class="more-title">关于光学传输</span>
+          <div class="oft-spacer"></div>
+          <mdui-tooltip content="关闭">
+            <mdui-button-icon id="more-close" icon="close" aria-label="关闭"></mdui-button-icon>
+          </mdui-tooltip>
+        </header>
+
+        <div class="more-body">
+          <mdui-navigation-rail id="more-rail" contained divider value="intro" aria-label="更多内容">
+            <mdui-navigation-rail-item value="intro" icon="info">介绍</mdui-navigation-rail-item>
+            <mdui-navigation-rail-item value="how" icon="auto_awesome">原理</mdui-navigation-rail-item>
+            <mdui-navigation-rail-item value="version" icon="history">版本</mdui-navigation-rail-item>
+            <mdui-navigation-rail-item value="license" icon="gavel">许可</mdui-navigation-rail-item>
+            <mdui-navigation-rail-item value="pwa" icon="download_for_offline">离线</mdui-navigation-rail-item>
+            <mdui-navigation-rail-item value="help" icon="help">帮助</mdui-navigation-rail-item>
+          </mdui-navigation-rail>
+
+          <div class="more-panels" id="more-panels">
+            <!-- 介绍 -->
+            <section class="more-panel is-active" data-panel="intro" tabindex="-1">
+              <h2>介绍</h2>
+              <p>
+                光学传输把「文件」变成「一段会动的二维码」。发送端把内容切块、喷泉编码，然后以固定帧率
+                把一块块二维码打在屏幕上；接收端的摄像头持续取景，逐个解出二维码里的数据块，凑齐之后
+                在本机重组、校验，最后交回原始文件或文字。
+              </p>
+              <p>
+                整条链路里没有服务器、没有 WebRTC、没有账号，也没有任何网络请求：数据只走屏幕的光和
+                手机的镜头。发送端与接收端可以在两台完全离线的设备上工作。
+              </p>
+              <div class="fact-grid">
+                <div class="fact"><strong>64 MB</strong><span>单文件上限</span></div>
+                <div class="fact"><strong>6 码</strong><span>单屏最多同显</span></div>
+                <div class="fact"><strong>64 B–3 KB</strong><span>每帧字节数可调</span></div>
+                <div class="fact"><strong>SHA-256</strong><span>还原后校验</span></div>
+              </div>
+              <h3>适用与不适用</h3>
+              <ul>
+                <li>适合：两台设备之间不便联网时的小文件、配置、网址、口令短语、照片。</li>
+                <li>适合：气隙（air-gap）环境里单向搬运少量数据。</li>
+                <li>不适合：大文件、需要保密的内容——二维码本身没有加密，附近任何摄像头都能拍到。</li>
+              </ul>
+            </section>
+
+            <!-- 原理 -->
+            <section class="more-panel" data-panel="how" tabindex="-1">
+              <h2>原理</h2>
+              <h3>喷泉码：丢帧只影响快慢</h3>
+              <p>
+                内容被切成 K 个数据块，发送端先顺序各发一遍，再发 K 个中等度数（4–24）的确定性修复帧，
+                然后循环。接收端只要凑够约 K×1.00–1.15 个互不相同的帧就能还原，不需要回传信道，
+                也不需要知道到底丢了哪几帧——这正是「喷泉」的含义。
+              </p>
+              <h3>带版本号的帧头（wire v3）</h3>
+              <p>
+                22 字节帧头：双魔数 <code class="oft-mono">0xD1 0xC3</code>、版本字节、flags 字节，
+                其后是会话 ID、序列号、K、块长、总长与负载校验。遇到读不懂的 Decimen 流会明确提示
+                「请更新发送端」，遇到无关的二维码则保持沉默。
+              </p>
+              <h3>容器、压缩与校验</h3>
+              <p>
+                负载外面套一层 49 字节容器：魔数、gzip 标志、文件名长度、MIME 长度、原始长度、传输长度
+                与 32 字节 SHA-256。压缩收益为正时用浏览器的 <code class="oft-mono">CompressionStream</code>
+                做 gzip；接收端在把结果交给你之前先验证 SHA-256，损坏的文件不会被保存。
+              </p>
+              <h3>本机解码</h3>
+              <p>
+                解码器是独立的 decimen-codec（QR-only 的 zxing-cpp WASM 构建），在 Web Worker 里运行，
+                WASM 已内联进页面，因此首次加载后可以完全断网使用；多码同屏时多个 Worker 并行解码。
+              </p>
+              <h3>速度取决于光</h3>
+              <p>
+                实际速率由「每帧字节数 × 帧率 × 屏上码数 × 解码成功率」共同决定。屏幕亮度、镜头素质、
+                对焦稳定性、环境光都会影响它——把手机固定住、屏幕调最亮、距离 20–40 厘米通常最稳。
+              </p>
+            </section>
+
+            <!-- 版本 -->
+            <section class="more-panel" data-panel="version" tabindex="-1">
+              <h2>版本</h2>
+              <dl class="kv-list">
+                <div class="kv"><dt>传输核心</dt><dd>Decimen Optical Transfer v0.5.3</dd></div>
+                <div class="kv"><dt>构建</dt><dd class="mono">5301fc2 · 官方 Release 产物</dd></div>
+                <div class="kv"><dt>线格式</dt><dd class="mono">wire v3（0xD1 0xC3，version = 3）</dd></div>
+                <div class="kv"><dt>界面框架</dt><dd id="kv-mdui">mdui 2 · Material Design 3</dd></div>
+                <div class="kv"><dt>界面语言</dt><dd>简体中文（核心自带 12 种语言）</dd></div>
+                <div class="kv"><dt>本页地址</dt><dd class="mono" id="kv-origin">—</dd></div>
+              </dl>
+              <h3>兼容性</h3>
+              <ul>
+                <li>0.5.x 之间互通；v0.3.0 / v0.4.x 与本版<b>不能</b>互通，请让两端使用同一代版本。</li>
+                <li>v0.5.3 接收端遇到旧格式发送端会明确提示「对方在用旧的 Decimen 格式」。</li>
+                <li>本页内嵌的核心与上游官方产物逐字节一致，只额外注入了「独立运行适配层」。</li>
+              </ul>
+              <mdui-list>
+                <mdui-list-item href="https://github.com/bashalarmistalt/decimen-optical-transfer" target="_blank" rel="noopener noreferrer" icon="code" end-icon="open_in_new">
+                  上游源码仓库
+                  <span slot="description">github.com/bashalarmistalt/decimen-optical-transfer</span>
+                </mdui-list-item>
+                <mdui-list-item href="https://github.com/bashalarmistalt/decimen-optical-transfer/releases" target="_blank" rel="noopener noreferrer" icon="new_releases" end-icon="open_in_new">
+                  上游发布记录
+                  <span slot="description">v0.5.3 的变更与校验和</span>
+                </mdui-list-item>
+                <mdui-list-item href="./docs/upstream-releases.md" icon="description" end-icon="arrow_forward">
+                  本地更新记录
+                  <span slot="description">docs/upstream-releases.md</span>
+                </mdui-list-item>
+                <mdui-list-item href="https://decimen.app/" target="_blank" rel="noopener noreferrer" icon="public" end-icon="open_in_new">
+                  原版网站
+                  <span slot="description">decimen.app（发送端 / 接收端同版本，可互通）</span>
+                </mdui-list-item>
+              </mdui-list>
+            </section>
+
+            <!-- 许可 -->
+            <section class="more-panel" data-panel="license" tabindex="-1">
+              <h2>许可</h2>
+              <h3>传输核心：AGPL-3.0-or-later</h3>
+              <p>
+                © 2026 Evan Crawley (Bash Alarmist)，部分代码由 Steve Dakh 以 MIT 贡献。
+                <b>这是强 copyleft 许可</b>：再分发（包括把本页部署到服务器供他人访问）需要保留许可证与
+                署名，并向使用者提供对应源码。
+              </p>
+              <h3>本页新增部分</h3>
+              <p>
+                界面外壳（首页、发送/接收流程、样式、脚本、PWA 支持）为本项目原创；核心页面
+                <code class="oft-mono">core/send.html</code>、<code class="oft-mono">core/receive.html</code>
+                与上游 Release 产物逐字节一致。
+              </p>
+              <mdui-list>
+                <mdui-list-item href="./LICENSES/Decimen-Optical-Transfer-v0.5.3-AGPL-3.0.txt" icon="gavel" end-icon="arrow_forward">
+                  AGPL-3.0 全文
+                  <span slot="description">LICENSES/Decimen-Optical-Transfer-v0.5.3-AGPL-3.0.txt</span>
+                </mdui-list-item>
+                <mdui-list-item href="./LICENSES/Decimen-Optical-Transfer-v0.5.3-NOTICE.txt" icon="article" end-icon="arrow_forward">
+                  第三方声明
+                  <span slot="description">NOTICE（含 Emscripten、zxing-cpp 等）</span>
+                </mdui-list-item>
+                <mdui-list-item href="./LICENSES/Decimen-Optical-Transfer-v0.3.0-MIT.txt" icon="history_edu" end-icon="arrow_forward">
+                  v0.3.0 的 MIT 许可
+                  <span slot="description">早期版本仍按 MIT 提供</span>
+                </mdui-list-item>
+                <mdui-list-item href="./vendor/mdui/LICENSE" icon="widgets" end-icon="arrow_forward">
+                  mdui（MIT）
+                  <span slot="description">vendor/mdui/LICENSE</span>
+                </mdui-list-item>
+                <mdui-list-item href="./vendor/material-icons/LICENSE" icon="emoji_symbols" end-icon="arrow_forward">
+                  Material Icons（Apache-2.0）
+                  <span slot="description">vendor/material-icons/LICENSE</span>
+                </mdui-list-item>
+              </mdui-list>
+            </section>
+
+            <!-- PWA -->
+            <section class="more-panel" data-panel="pwa" tabindex="-1">
+              <h2>离线使用（PWA）</h2>
+              <p>
+                把本页安装成应用后，整套界面与传输核心都会缓存到本机：断网、飞行模式、甚至完全没有
+                网络的环境里也能打开并完成一次光学传输。接收端需要的摄像头权限与网络无关。
+              </p>
+
+              <div class="pwa-state" id="pwa-state">
+                <mdui-icon name="download_for_offline" aria-hidden="true"></mdui-icon>
+                <span class="pwa-state-text">
+                  <strong id="pwa-state-title">正在检查安装状态…</strong>
+                  <span class="oft-small" id="pwa-state-detail">—</span>
+                </span>
+              </div>
+
+              <div class="step-actions">
+                <mdui-button id="pwa-install" variant="filled" icon="install_desktop" disabled>安装到本机</mdui-button>
+                <mdui-button id="pwa-update" variant="outlined" icon="refresh">检查更新</mdui-button>
+                <mdui-button id="pwa-clear" variant="text" icon="delete_sweep">清除离线缓存</mdui-button>
+              </div>
+
+              <dl class="kv-list">
+                <div class="kv"><dt>离线缓存</dt><dd id="pwa-cache-state">—</dd></div>
+                <div class="kv"><dt>缓存占用</dt><dd id="pwa-cache-usage">—</dd></div>
+                <div class="kv"><dt>当前状态</dt><dd id="pwa-network">—</dd></div>
+              </dl>
+
+              <h3>手动安装</h3>
+              <ul>
+                <li><b>Chrome / Edge（桌面）</b>：地址栏右侧的「安装」图标，或菜单 → 投放、保存和共享 → 安装页面为应用。</li>
+                <li><b>Android Chrome</b>：菜单 → 添加到主屏幕 / 安装应用。</li>
+                <li><b>iOS Safari</b>：分享 → 添加到主屏幕（iOS 不支持自动安装提示，功能不受影响）。</li>
+              </ul>
+              <p class="oft-small">
+                提示：离线缓存只在 <code class="oft-mono">https://</code> 或
+                <code class="oft-mono">http://localhost</code> 下生效；用 <code class="oft-mono">file://</code>
+                直接双击打开时浏览器会禁用 Service Worker。
+              </p>
+            </section>
+
+            <!-- 帮助 -->
+            <section class="more-panel" data-panel="help" tabindex="-1">
+              <h2>帮助</h2>
+              <h3>一次传输的四个步骤</h3>
+              <ol>
+                <li><b>发送端</b>：点「发送」，选择文件（≤ 64 MB）或切到「文字」粘贴内容。</li>
+                <li><b>接收端</b>：另一台设备打开本页 → 「接收」→「开始扫描」并允许摄像头。</li>
+                <li><b>对准</b>：让二维码尽量占满取景框，发送端亮度调到最高，手机最好固定住。</li>
+                <li><b>等待</b>：进度到 100% 后会自动做 SHA-256 校验，然后就能保存文件或复制文字。</li>
+              </ol>
+              <h3>常见问题</h3>
+              <ul>
+                <li><b>摄像头打不开</b>：必须是 <code class="oft-mono">https://</code> 或 <code class="oft-mono">http://localhost</code>；局域网 http 会被浏览器拒绝。</li>
+                <li><b>进度条纹丝不动</b>：把发送端「传输设置 → 每帧字节数」降到 1000 左右、帧率降到 20–30，并调高屏幕亮度、固定手机。</li>
+                <li><b>选错了镜头</b>：接收端在核心页面的「接收设置 → 摄像头」里手动指定，切换是实时的。</li>
+                <li><b>两端版本不一致</b>：v0.3.0 / v0.4.x 与 v0.5.x 线格式不同，两个方向都不通。</li>
+                <li><b>想传大文件</b>：64 MB 是核心硬上限；光学链路适合小文件与文本。</li>
+              </ul>
+              <h3>环境检测</h3>
+              <p id="help-env" class="oft-small">正在检测…</p>
+              <mdui-list>
+                <mdui-list-item href="./README.md" icon="menu_book" end-icon="arrow_forward">
+                  项目说明
+                  <span slot="description">README：目录结构、构建方式、验证记录</span>
+                </mdui-list-item>
+                <mdui-list-item href="./core/send.html" target="_blank" rel="noopener" icon="open_in_new">
+                  直接打开核心发送端
+                  <span slot="description">core/send.html（不含引导流程）</span>
+                </mdui-list-item>
+                <mdui-list-item href="./core/receive.html" target="_blank" rel="noopener" icon="open_in_new">
+                  直接打开核心接收端
+                  <span slot="description">core/receive.html（不含引导流程）</span>
+                </mdui-list-item>
+              </mdui-list>
+            </section>
+          </div>
+        </div>
+      </div>
+    </mdui-dialog>
+
+    <script src="./js/app.js"></script>
+    <script src="./js/home.js"></script>
+  </body>
+</html>

@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN" class="mdui-theme-auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>发送 · 光学传输</title>
+    <meta name="description" content="选择文件或文字，屏幕变成一串不断变化的二维码，让另一台设备的摄像头把内容读走。全程不联网。" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#01796F" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d1513" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icons/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <link rel="stylesheet" href="./vendor/mdui/mdui.css" />
+    <link rel="stylesheet" href="./css/app.css" />
+    <script src="./vendor/mdui/mdui.global.js"></script>
+    <script src="./js/theme.js"></script>
+  </head>
+  <body class="oft-page oft-send">
+    <mdui-top-app-bar class="app-bar">
+      <mdui-button-icon id="back-home" icon="arrow_back" aria-label="返回首页"></mdui-button-icon>
+      <mdui-top-app-bar-title>发送</mdui-top-app-bar-title>
+      <div class="oft-spacer"></div>
+      <mdui-tooltip content="切换外观（跟随系统 / 浅色 / 深色）">
+        <mdui-button-icon id="theme-toggle" icon="brightness_auto" aria-label="切换外观"></mdui-button-icon>
+      </mdui-tooltip>
+    </mdui-top-app-bar>
+
+    <main class="page-main">
+      <div class="flow-grid">
+        <div class="flow-col">
+          <ol class="stepper" id="stepper" aria-label="发送步骤">
+            <li data-step="1" data-state="active">
+              <span class="step-dot">1</span>
+              <span class="step-text"><strong>选择内容</strong><small>文件或一段文字</small></span>
+            </li>
+            <li data-step="2" data-state="todo">
+              <span class="step-dot">2</span>
+              <span class="step-text"><strong>对端打开接收页</strong><small>扫码或输入网址</small></span>
+            </li>
+            <li data-step="3" data-state="todo">
+              <span class="step-dot">3</span>
+              <span class="step-text"><strong>对准屏幕扫描</strong><small>展示二维码并等待</small></span>
+            </li>
+          </ol>
+
+          <!-- 第 1 步：选择内容 -->
+          <section class="step-panel is-active" data-step="1" aria-labelledby="send-step1-title">
+            <header class="step-head">
+              <p class="oft-overline">第 1 步 / 共 3 步</p>
+              <h1 id="send-step1-title">选择要发送的内容</h1>
+              <p>文件最大 64 MB；也可以直接发一段文字——网址、配置片段、口令短语都行。</p>
+            </header>
+
+            <mdui-segmented-button-group id="mode-group" selects="single" value="file" full-width>
+              <mdui-segmented-button value="file" icon="insert_drive_file">文件</mdui-segmented-button>
+              <mdui-segmented-button value="snippet" icon="notes">文字</mdui-segmented-button>
+            </mdui-segmented-button-group>
+
+            <div id="pane-file">
+              <div class="step-note manual-note" id="manual-note" hidden>
+                <mdui-icon name="info" aria-hidden="true"></mdui-icon>
+                <span>
+                  当前环境（<span class="oft-mono" id="manual-reason">file:// 或跨源</span>）不允许本页自动驱动核心，
+                  已切换为手动模式：右边的核心页面本身就能选文件、开始传输。用本地服务器打开
+                  （<span class="oft-mono">python -m http.server 8000</span>）即可恢复引导流程。
+                </span>
+              </div>
+              <div class="drop-zone" id="drop-zone">
+                <mdui-icon name="upload_file" aria-hidden="true"></mdui-icon>
+                <strong>把文件拖到这里</strong>
+                <span class="drop-hint">或点击下面的按钮选择 · 单文件上限 64 MB · 不上传、不联网</span>
+                <mdui-button id="pick-file" variant="tonal" icon="folder_open">选择文件</mdui-button>
+                <input type="file" id="file-input" class="sr-only" aria-label="选择要发送的文件" />
+              </div>
+
+              <div class="file-card" id="file-card" hidden>
+                <mdui-icon name="description" aria-hidden="true"></mdui-icon>
+                <span class="file-meta">
+                  <span class="file-name" id="file-name">—</span>
+                  <span class="file-size" id="file-size">—</span>
+                </span>
+                <span class="oft-spacer"></span>
+                <mdui-button id="clear-file" variant="text" icon="close">移除</mdui-button>
+              </div>
+            </div>
+
+            <div id="pane-snippet" hidden>
+              <mdui-text-field
+                id="snippet-input"
+                label="要发送的文字"
+                variant="outlined"
+                rows="6"
+                maxlength="4194304"
+                counter
+                placeholder="粘贴或输入任意文字…"
+                helper="上限 4 MB；网址、口令、配置片段都很合适"
+              ></mdui-text-field>
+            </div>
+
+            <div class="step-actions">
+              <mdui-button id="to-step-2" variant="filled" end-icon="arrow_forward" disabled>下一步</mdui-button>
+              <span class="oft-small oft-muted" id="step1-hint">先选择文件，或切换到「文字」输入内容</span>
+            </div>
+          </section>
+
+          <!-- 第 2 步：让对端打开接收页 -->
+          <section class="step-panel" data-step="2" aria-labelledby="send-step2-title">
+            <header class="step-head">
+              <p class="oft-overline">第 2 步 / 共 3 步</p>
+              <h1 id="send-step2-title">在另一台设备打开接收页</h1>
+              <p>用手机扫右侧二维码，或直接输入下面的地址。接收页就是本页的「接收」入口。</p>
+            </header>
+
+            <div class="address-card">
+              <div class="address-row">
+                <span class="address-value" id="receive-url">—</span>
+                <mdui-button id="copy-url" variant="tonal" icon="content_copy">复制</mdui-button>
+                <mdui-button id="open-url" variant="text" icon="open_in_new" target="_blank" rel="noopener">打开</mdui-button>
+              </div>
+              <p class="address-alt">
+                手动输入也行：<b class="oft-mono">oft.nickdl.site</b>。原版网站
+                <a href="https://decimen.app/receive/" target="_blank" rel="noopener noreferrer">decimen.app/receive</a>
+                同样可以接收（两端需为同一代版本 v0.5.x）。
+              </p>
+            </div>
+
+            <div class="step-note">
+              <mdui-icon name="videocam" aria-hidden="true"></mdui-icon>
+              <span>接收端必须允许摄像头：只有 <b>https://</b> 或 <b>http://localhost</b> 打开时浏览器才会授权；局域网 http 地址会被拒绝。</span>
+            </div>
+
+            <div class="step-actions">
+              <mdui-button id="to-step-1" variant="text" icon="arrow_back">上一步</mdui-button>
+              <mdui-button id="to-step-3" variant="filled" end-icon="qr_code_2">开始显示二维码</mdui-button>
+            </div>
+          </section>
+
+          <!-- 第 3 步：展示二维码 -->
+          <section class="step-panel" data-step="3" aria-labelledby="send-step3-title">
+            <header class="step-head">
+              <p class="oft-overline">第 3 步 / 共 3 步</p>
+              <h1 id="send-step3-title">让接收端对准这块屏幕</h1>
+              <p>二维码正在循环播放整份内容。接收端凑够数据块后会自动还原并做 SHA-256 校验。</p>
+            </header>
+
+            <div class="step-note">
+              <mdui-icon name="tips_and_updates" aria-hidden="true"></mdui-icon>
+              <span>把这块屏幕亮度调到最高、手机固定住、让二维码尽量占满取景框。传得慢可以点「传输设置」调低每帧字节数或帧率。</span>
+            </div>
+
+            <dl class="kv-list" id="stream-specs" hidden>
+              <div class="kv"><dt>帧率</dt><dd id="spec-fps">—</dd></div>
+              <div class="kv"><dt>每帧字节</dt><dd id="spec-frame">—</dd></div>
+              <div class="kv"><dt>二维码</dt><dd id="spec-qr">—</dd></div>
+              <div class="kv"><dt>发送量</dt><dd id="spec-payload">—</dd></div>
+              <div class="kv"><dt>压缩</dt><dd id="spec-compression">—</dd></div>
+              <div class="kv"><dt>喷泉块 K</dt><dd id="spec-k">—</dd></div>
+            </dl>
+
+            <mdui-collapse id="advanced-settings">
+              <mdui-collapse-item value="settings" header="传输设置（传得慢就调这里）">
+                <div class="settings-grid">
+                  <mdui-select id="cfg-fps" label="帧率 fps" value="60">
+                    <mdui-menu-item value="10">10</mdui-menu-item>
+                    <mdui-menu-item value="15">15</mdui-menu-item>
+                    <mdui-menu-item value="20">20</mdui-menu-item>
+                    <mdui-menu-item value="24">24</mdui-menu-item>
+                    <mdui-menu-item value="30">30</mdui-menu-item>
+                    <mdui-menu-item value="55">55</mdui-menu-item>
+                    <mdui-menu-item value="60">60</mdui-menu-item>
+                  </mdui-select>
+                  <mdui-select id="cfg-bytes" label="每帧字节" value="2953">
+                    <mdui-menu-item value="500">500</mdui-menu-item>
+                    <mdui-menu-item value="1000">1000</mdui-menu-item>
+                    <mdui-menu-item value="1465">1465</mdui-menu-item>
+                    <mdui-menu-item value="1850">1850</mdui-menu-item>
+                    <mdui-menu-item value="2331">2331</mdui-menu-item>
+                    <mdui-menu-item value="2953">2953</mdui-menu-item>
+                  </mdui-select>
+                  <mdui-select id="cfg-grid" label="屏上码数" value="1">
+                    <mdui-menu-item value="1">1 个</mdui-menu-item>
+                    <mdui-menu-item value="2">2 个（1×2）</mdui-menu-item>
+                    <mdui-menu-item value="4">4 个（2×2）</mdui-menu-item>
+                    <mdui-menu-item value="6">6 个（2×3）</mdui-menu-item>
+                  </mdui-select>
+                  <mdui-select id="cfg-ecc" label="纠错等级" value="L">
+                    <mdui-menu-item value="L">L（最低，最快）</mdui-menu-item>
+                    <mdui-menu-item value="M">M</mdui-menu-item>
+                    <mdui-menu-item value="Q">Q</mdui-menu-item>
+                    <mdui-menu-item value="H">H（最高，最慢）</mdui-menu-item>
+                  </mdui-select>
+                </div>
+                <p class="oft-small oft-muted" style="margin-top: 0.75rem">
+                  改动会立即重新开始发送。传得慢时先把「每帧字节」降到 1000、帧率降到 20–30；屏幕越亮、镜头越稳、距离越近，恢复越快。
+                </p>
+              </mdui-collapse-item>
+            </mdui-collapse>
+
+            <div class="step-actions">
+              <mdui-button id="to-step-2b" variant="text" icon="arrow_back">上一步</mdui-button>
+              <mdui-button id="reset-flow" variant="text" icon="restart_alt">重新选择内容</mdui-button>
+            </div>
+          </section>
+        </div>
+
+        <aside class="stage-col">
+          <div class="stage" id="stage" data-view="empty">
+            <div class="stage-frame">
+              <iframe
+                id="core-frame"
+                class="core-frame"
+                title="光学传输核心（发送端）"
+                allow="camera; clipboard-write; fullscreen; screen-wake-lock"
+                referrerpolicy="no-referrer"
+              ></iframe>
+            </div>
+            <img id="stage-qr" class="stage-linkqr" alt="用另一台设备扫描此二维码，打开接收页" hidden />
+            <div class="stage-empty" id="stage-empty">
+              <mdui-icon name="qr_code_2" aria-hidden="true"></mdui-icon>
+              <strong id="stage-empty-title">二维码会显示在这里</strong>
+              <span class="oft-small" id="stage-empty-text">先选择要发送的内容</span>
+            </div>
+            <div class="stage-status" id="stage-status" hidden>
+              <mdui-icon name="sensors" aria-hidden="true" style="font-size: 1.05rem"></mdui-icon>
+              <span class="status-text" id="stage-status-text">准备中…</span>
+              <mdui-button-icon id="stage-fullscreen" icon="fullscreen" aria-label="全屏显示二维码"></mdui-button-icon>
+            </div>
+          </div>
+          <p class="oft-small oft-muted" id="stage-caption">
+            提示：接收端与发送端必须使用同一代核心版本（当前 v0.5.3）。
+          </p>
+        </aside>
+      </div>
+    </main>
+
+    <script src="./js/app.js"></script>
+    <script src="./js/stepper.js"></script>
+    <script src="./js/core-bridge.js"></script>
+    <script src="./js/flow-send.js"></script>
+  </body>
+</html>

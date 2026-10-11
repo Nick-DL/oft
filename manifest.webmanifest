@@ -1,0 +1,26 @@
+{
+  "name": "光学传输 · 屏幕 → 摄像头",
+  "short_name": "光学传输",
+  "description": "把文件或文字变成一串不断变化的二维码，让另一台设备的摄像头读走。全程不联网，可离线使用。",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "any",
+  "background_color": "#fbfdf9",
+  "theme_color": "#01796F",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "./icons/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "发送", "short_name": "发送", "url": "./send.html", "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "接收", "short_name": "接收", "url": "./receive.html", "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

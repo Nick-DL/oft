@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="光学传输">
+  <title>光学传输</title>
+  <defs>
+    <linearGradient id="oft-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#01796F"/>
+      <stop offset="1" stop-color="#004A43"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="62" height="62" rx="14" fill="url(#oft-bg)"/>
+  <rect x="10.0" y="10.0" width="44.0" height="44.0" rx="7.48" fill="#FAFDFB"/>
+  <g>
+    <rect x="15.50" y="15.50" width="14.14" height="14.14" rx="1.32" fill="#004A43"/>
+    <rect x="19.27" y="19.27" width="6.60" height="6.60" rx="0.75" fill="#FAFDFB"/>
+    <rect x="21.53" y="21.53" width="2.07" height="2.07" rx="0.47" fill="#004A43"/>
+    <rect x="34.36" y="15.50" width="14.14" height="14.14" rx="1.32" fill="#004A43"/>
+    <rect x="38.13" y="19.27" width="6.60" height="6.60" rx="0.75" fill="#FAFDFB"/>
+    <rect x="40.39" y="21.53" width="2.07" height="2.07" rx="0.47" fill="#004A43"/>
+    <rect x="15.50" y="34.36" width="14.14" height="14.14" rx="1.32" fill="#004A43"/>
+    <rect x="19.27" y="38.13" width="6.60" height="6.60" rx="0.75" fill="#FAFDFB"/>
+    <rect x="21.53" y="40.39" width="2.07" height="2.07" rx="0.47" fill="#004A43"/>
+    <rect x="30.02" y="30.02" width="3.96" height="3.96" rx="0.94" fill="#004A43"/>
+    <rect x="34.73" y="30.02" width="3.96" height="3.96" rx="0.94" fill="#004A43"/>
+    <rect x="44.16" y="30.02" width="3.96" height="3.96" rx="0.94" fill="#004A43"/>
+    <rect x="30.02" y="34.73" width="3.96" height="3.96" rx="0.94" fill="#004A43"/>
+    <rect x="39.45" y="34.73" width="3.96" height="3.96" rx="0.94" fill="#004A43"/>
+    <rect x="44.16" y="34.73" width="3.96" height="3.96" rx="0.94" fill="#004A43"/>
+    <rect x="34.73" y="39.45" width="3.96" height="3.96" rx="0.94" fill="#004A43"/>
+    <rect x="44.16" y="39.45" width="3.96" height="3.96" rx="0.94" fill="#004A43"/>
+    <rect x="30.02" y="44.16" width="3.96" height="3.96" rx="0.94" fill="#004A43"/>
+    <rect x="39.45" y="44.16" width="3.96" height="3.96" rx="0.94" fill="#004A43"/>
+    <rect x="44.16" y="44.16" width="3.96" height="3.96" rx="0.94" fill="#004A43"/>
+  </g>
+</svg>

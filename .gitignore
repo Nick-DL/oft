@@ -1,0 +1,25 @@
+# 光学传输（oft）· .gitignore
+#
+# 原则：仓库里只放「应用本身」——页面、样式、脚本、PWA、依赖、许可证与文档。
+# 测试/验证相关的东西（脚本本体与它产生的截图、临时 profile、日志）一律不入库，
+# 但**保留在工作区**，随时可以重跑（用法见 README 的「自检」一节）。
+
+# --- 本地验证脚本本体（测试工具，不是应用的一部分）---
+tools/verify/
+
+# --- 验证脚本的产物：无头浏览器截图、临时 profile、离线缓存副本等 ---
+.verify*/
+docs/screenshots/
+
+# --- 依赖与工具链 ---
+node_modules/
+.pnpm-store/
+*.log
+
+# --- 编辑器 / 操作系统 ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp

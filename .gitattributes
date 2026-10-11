@@ -1,0 +1,8 @@
+# 默认：文本按 LF 入库（Windows 检出为 CRLF）
+* text=auto
+
+# 逐字节未改的第三方内容：禁止任何行尾转换，
+# 这样任何平台 clone 下来后 core/ 仍与 optical-transfer/ 里的上游产物逐字节一致
+#（README 与验证脚本都以 SHA-256 核对这一点）。
+core/**    -text
+vendor/**  -text
