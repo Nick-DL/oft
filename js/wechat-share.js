@@ -105,6 +105,21 @@
     ].join(''), trigger, 'share-guide--image');
   }
 
+  /**
+   * 这张图没法走微信的长按转发：超过微信 25 MB 的转发上限，
+   * 或者拿不到可分享的图片数据。给出替代做法。
+   */
+  function imageUnavailable(reason, trigger) {
+    show([
+      '<div class="share-guide-card" role="dialog" aria-modal="true" aria-labelledby="share-guide-title" tabindex="-1">',
+      '<strong id="share-guide-title">这张图不能用微信转发</strong>',
+      '<p>' + escapeHtml(reason || '微信只认普通图片地址，这里拿不到可分享的数据。') + '</p>',
+      '<p>先点底部的「保存文件」把图片存到手机，再从微信聊天窗口里发送即可。</p>',
+      '<div class="share-guide-actions"><mdui-button variant="text" data-share-close>知道了</mdui-button></div>',
+      '</div>'
+    ].join(''), trigger);
+  }
+
   /** 显示页面里标记了 data-wechat-only 的元素，并接上 data-wechat-link 按钮 */
   function activate(root) {
     var scope = root || document;
@@ -122,6 +137,7 @@
     isWeChat: isWeChat,
     linkGuide: linkGuide,
     imageGuide: imageGuide,
+    imageUnavailable: imageUnavailable,
     activate: activate,
     close: close
   };

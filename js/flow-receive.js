@@ -239,7 +239,7 @@
       if (els.resultMeta) els.resultMeta.hidden = true;
       if (els.saveFile) els.saveFile.hidden = true;
       if (els.copyText) els.copyText.hidden = true;
-      if (els.shareWechat) els.shareWechat.hidden = true;
+      hideShareImage();
       if (els.backToScan) els.backToScan.hidden = false;
       if (els.receiveAgain) els.receiveAgain.hidden = false;
       setStatus('传输失败');
@@ -263,19 +263,74 @@
     if (els.backToScan) els.backToScan.hidden = true;
 
     // 微信里收到图片：给出「分享到微信」——长按大图即可转发（文件类型没有这条路）
-    var wechat = OFT.wechat;
-    if (els.shareWechat && wechat && wechat.isWeChat && result.imageSrc) {
-      els.shareWechat.hidden = false;
-      els.shareWechat.onclick = function () {
-        wechat.imageGuide(result.imageSrc, result.name, els.shareWechat);
-      };
-    } else if (els.shareWechat) {
-      els.shareWechat.hidden = true;
-      els.shareWechat.onclick = null;
-    }
+    captureShareImage(result);
 
     setStatus(result.detail || '接收完成');
     U.toast('接收完成' + (result.name && result.name !== '文字内容' ? '：' + shorten(result.name) : ''));
+  }
+
+  /* ------------------------------------------------- 微信：分享收到的图片 */
+  /* 核心的图片预览用的是 blob: 地址（页面里能看，但微信的长按转发只认 data:/http(s)），
+     所以先把字节抓下来存好，点分享时再转成 base64 大图。 */
+  var WECHAT_IMAGE_LIMIT = 20 * 1024 * 1024;   // 微信转发图片上限 25 MB，留点余量
+
+  function blobToDataUrl(blob) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(String(reader.result || '')); };
+      reader.onerror = function () { reject(reader.error || new Error('读取图片失败')); };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  function hideShareImage() {
+    if (els.shareWechat) {
+      els.shareWechat.hidden = true;
+      els.shareWechat.onclick = null;
+      els.shareWechat.removeAttribute('loading');
+    }
+    state.shareImage = null;
+  }
+
+  function captureShareImage(result) {
+    hideShareImage();
+    var wechat = OFT.wechat;
+    if (!els.shareWechat || !wechat || !wechat.isWeChat || !result.imageSrc) return;
+    fetch(result.imageSrc).then(function (response) {
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      return response.blob();
+    }).then(function (blob) {
+      state.shareImage = { blob: blob, name: result.name };
+      els.shareWechat.hidden = false;
+      els.shareWechat.onclick = openShareImage;
+    }, function () {
+      // 抓不到字节就退回原地址（还能看到图，但微信大概率转发不了）
+      state.shareImage = { src: result.imageSrc, name: result.name };
+      els.shareWechat.hidden = false;
+      els.shareWechat.onclick = openShareImage;
+    });
+  }
+
+  function openShareImage() {
+    var data = state.shareImage;
+    var wechat = OFT.wechat;
+    if (!data || !wechat || !els.shareWechat) return;
+    if (!data.blob) {
+      wechat.imageUnavailable('这张图片的数据已经不可用，请让发送端重发一次。', els.shareWechat);
+      return;
+    }
+    if (data.blob.size > WECHAT_IMAGE_LIMIT) {
+      wechat.imageUnavailable('它大约 ' + U.formatBytes(data.blob.size) + '，超过微信 25 MB 的转发上限。', els.shareWechat);
+      return;
+    }
+    els.shareWechat.setAttribute('loading', '');
+    blobToDataUrl(data.blob).then(function (url) {
+      els.shareWechat.removeAttribute('loading');
+      wechat.imageGuide(url, data.name, els.shareWechat);
+    }, function () {
+      els.shareWechat.removeAttribute('loading');
+      wechat.imageUnavailable('这张图片没法转成微信能识别的格式。', els.shareWechat);
+    });
   }
 
   function shorten(name, max) {
@@ -326,7 +381,7 @@
     els.backToScan.addEventListener('click', function () {
       state.result = null;
       if (els.progress) els.progress.hidden = true;
-      if (els.shareWechat) els.shareWechat.hidden = true;
+      hideShareImage();
       flow.go(2, { force: true });
     });
   }
@@ -335,7 +390,7 @@
       state.result = null;
       state.cameraReady = false;
       if (els.progress) els.progress.hidden = true;
-      if (els.shareWechat) els.shareWechat.hidden = true;
+      hideShareImage();
       scanning(false);
       stageView('empty');
       setEmpty('正在重新准备…', '马上重新打开摄像头');
