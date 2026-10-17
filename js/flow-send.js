@@ -64,7 +64,8 @@
       bytes: $('#cfg-bytes'),
       grid: $('#cfg-grid'),
       ecc: $('#cfg-ecc')
-    }
+    },
+    resetSettings: $('#reset-settings')
   };
 
   var bridge = OFT.bridge.create({
@@ -80,10 +81,86 @@
     text: '',
     manual: false,
     streamStarted: false,
+    reloadBeforePrepare: false,
     linkQr: ''
   };
 
   var receiveUrl = U.receivePageUrl();
+
+  /* ------------------------------------------- 传输设置：记住用户的选择 */
+  var SETTINGS_KEY = 'oft.send.settings';
+  var SETTING_DEFS = [
+    { key: 'fps', selector: '#cfg-fps', fallback: '60' },
+    { key: 'bytes', selector: '#cfg-bytes', fallback: '2953' },
+    { key: 'grid', selector: '#cfg-grid', fallback: '1' },
+    { key: 'ecc', selector: '#cfg-ecc', fallback: 'L' }
+  ];
+
+  function readStoredSettings() {
+    try {
+      var raw = window.localStorage.getItem(SETTINGS_KEY);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function writeStoredSettings() {
+    try {
+      var data = {};
+      SETTING_DEFS.forEach(function (def) {
+        var control = els.settings[def.key];
+        if (control && control.value) data[def.key] = control.value;
+      });
+      window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(data));
+    } catch (error) {
+      // 隐私模式 / 存储被禁用：静默降级，不影响本次使用
+    }
+  }
+
+  /** 下拉框里真的有这个候选值才采用（防止旧版本或手改存储塞进非法值） */
+  function allowedValue(control, value) {
+    var items = control.querySelectorAll('mdui-menu-item');
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].value === value) return true;
+    }
+    return false;
+  }
+
+  /** 把界面上的四个下拉框推给核心（核心每次重载后都要重推一次） */
+  function applySettingsToCore() {
+    if (state.manual || !bridge.available()) return;
+    SETTING_DEFS.forEach(function (def) {
+      var control = els.settings[def.key];
+      if (!control || !control.value) return;
+      bridge.setValue(def.selector, String(control.value));
+    });
+    applyStreamSpecs();
+  }
+
+  /** 启动时把上次保存的偏好填回下拉框 */
+  function restoreSettings() {
+    var stored = readStoredSettings();
+    if (!stored) return;
+    SETTING_DEFS.forEach(function (def) {
+      var control = els.settings[def.key];
+      if (!control || stored[def.key] === undefined || stored[def.key] === null) return;
+      var value = String(stored[def.key]);
+      if (allowedValue(control, value)) control.value = value;
+    });
+  }
+
+  function resetSettings() {
+    SETTING_DEFS.forEach(function (def) {
+      var control = els.settings[def.key];
+      if (control) control.value = def.fallback;
+    });
+    writeStoredSettings();
+    applySettingsToCore();
+    U.toast('传输设置已恢复默认');
+  }
 
   /* ------------------------------------------------------------ 舞台控制 */
   function stageView(view) {
@@ -137,6 +214,7 @@
       U.toast(problem);
       return;
     }
+    invalidateStream();
     state.file = file;
     renderFileCard();
     refreshStep1();
@@ -174,6 +252,7 @@
   }
   if (els.clearFile) {
     els.clearFile.addEventListener('click', function () {
+      invalidateStream();
       state.file = null;
       if (els.fileInput) els.fileInput.value = '';
       renderFileCard();
@@ -182,7 +261,9 @@
   }
   if (els.modeGroup) {
     els.modeGroup.addEventListener('change', function (event) {
-      state.mode = event.target.value === 'snippet' ? 'snippet' : 'file';
+      var next = event.target.value === 'snippet' ? 'snippet' : 'file';
+      if (next !== state.mode) invalidateStream();
+      state.mode = next;
       if (els.paneFile) els.paneFile.hidden = state.mode !== 'file';
       if (els.paneSnippet) els.paneSnippet.hidden = state.mode !== 'snippet';
       refreshStep1();
@@ -190,7 +271,9 @@
   }
   if (els.snippet) {
     els.snippet.addEventListener('input', function () {
-      state.text = els.snippet.value || '';
+      var next = els.snippet.value || '';
+      if (next !== state.text) invalidateStream();
+      state.text = next;
       refreshStep1();
     });
   }
@@ -222,6 +305,24 @@
     return text;
   }
 
+  /**
+   * 内容变了（换文件 / 改文字 / 换模式）→ 核心里的旧流必须作废。
+   * 否则第 3 步画的还是上一份内容的二维码：核心已经开过流时，下次进入第 2/3 步
+   * 会先把核心页重载一遍，再推新内容。
+   */
+  function invalidateStream() {
+    var wasStreaming = state.streamStarted;
+    state.streamStarted = false;
+    if (!wasStreaming) return;
+    if (!state.manual) state.reloadBeforePrepare = true;
+    if (els.streamSpecs) els.streamSpecs.hidden = true;
+    Object.keys(SPEC_MAP).forEach(function (key) {
+      if (els.spec[key]) els.spec[key].textContent = '—';
+    });
+    mirrorStatus();
+    setStageStatus('内容已更改，下一步会重新开始发送');
+  }
+
   /** 把选好的内容交给核心并等第一帧锁定 */
   function prepareStream() {
     if (state.manual) return Promise.resolve(false);
@@ -231,18 +332,26 @@
         enterManualMode('跨源 / file://');
         return false;
       }
-      if (state.mode === 'file') {
-        if (!state.file) throw new Error('还没有选择文件');
-        var pushed = bridge.setFiles('#cfg-file', [state.file]);
-        if (!pushed) throw new Error('无法把文件交给核心页面');
-      } else {
-        if (!state.text.trim()) throw new Error('还没有输入文字');
-        if (state.text.length > SNIPPET_LIMIT) throw new Error('文字超过 4 MB 上限');
-        bridge.setValue('#snippet-text', state.text);
-        return bridge.wait(80).then(function () {
-          if (!bridge.click('#send-snippet')) throw new Error('无法触发核心的发送按钮');
-        });
-      }
+      // 换过内容且核心之前已经开过流：先重载，避免它继续画旧内容
+      var before = state.reloadBeforePrepare
+        ? bridge.reload().then(function () { applySettingsToCore(); })
+        : Promise.resolve();
+      return before.then(function () {
+        state.reloadBeforePrepare = false;
+        applySettingsToCore();
+        if (state.mode === 'file') {
+          if (!state.file) throw new Error('还没有选择文件');
+          var pushed = bridge.setFiles('#cfg-file', [state.file]);
+          if (!pushed) throw new Error('无法把文件交给核心页面');
+        } else {
+          if (!state.text.trim()) throw new Error('还没有输入文字');
+          if (state.text.length > SNIPPET_LIMIT) throw new Error('文字超过 4 MB 上限');
+          bridge.setValue('#snippet-text', state.text);
+          return bridge.wait(80).then(function () {
+            if (!bridge.click('#send-snippet')) throw new Error('无法触发核心的发送按钮');
+          });
+        }
+      });
     }).then(function (result) {
       if (result === false) return false;
       return bridge.waitUntil(function () {
@@ -331,6 +440,8 @@
     mirrorStatus();
     bridge.observe('#specs', function () { mirrorStatus(); });
     watchStreamSpecs();
+    // 核心每次（重）载入都回到默认参数，这里把用户保存的偏好再推一遍
+    bridge.load().then(function () { applySettingsToCore(); }, function () { /* 忽略 */ });
   });
 
   /* ------------------------------------------------- 传输设置 → 核心 */
@@ -341,6 +452,7 @@
       var value = control.value;
       if (value === undefined || value === null || value === '') return;
       var ok = bridge.setValue(selector, String(value));
+      writeStoredSettings();
       if (!ok) {
         U.toast('设置没能传给核心页面');
         return;
@@ -355,6 +467,7 @@
   pushSetting('bytes', '#cfg-bytes');
   pushSetting('grid', '#cfg-grid');
   pushSetting('ecc', '#cfg-ecc');
+  if (els.resetSettings) els.resetSettings.addEventListener('click', resetSettings);
 
   /* ------------------------------------------------------------ 步骤机 */
   function contentReady() {
@@ -438,13 +551,16 @@
   if (els.toStep2b) els.toStep2b.addEventListener('click', function () { flow.go(2); });
   if (els.reset) {
     els.reset.addEventListener('click', function () {
-      state.streamStarted = false;
+      invalidateStream();
       state.linkQr = '';
+      state.reloadBeforePrepare = false;
       if (els.stageQr) { els.stageQr.hidden = true; els.stageQr.removeAttribute('src'); }
       if (els.streamSpecs) els.streamSpecs.hidden = true;
       stageView('empty');
       setEmpty('二维码会显示在这里', '重新选择内容后继续');
-      if (!state.manual) bridge.reload().catch(function () { /* 忽略 */ });
+      if (!state.manual) {
+        bridge.reload().then(function () { applySettingsToCore(); }, function () { /* 忽略 */ });
+      }
       flow.go(1);
     });
   }
@@ -481,6 +597,7 @@
   if (els.stageCaption) els.stageCaption.textContent = '接收页地址：' + receiveUrl;
 
   /* ------------------------------------------------------------ 启动 */
+  restoreSettings();
   renderFileCard();
   refreshStep1();
   stageView('empty');

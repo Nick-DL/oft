@@ -156,8 +156,9 @@ mdui-button.home-action::part(label) {
   line-height: 1.35;
 }
 mdui-button.home-action::part(end-icon) { font-size: 1.5rem; opacity: .75; }
+/* 「更多」和上面两个主按钮同尺寸，只是换成 outlined 样式 */
+mdui-button.home-more::part(icon) { font-size: 2rem; opacity: .9; }
 
-.home-more { align-self: center; }
 .page-foot {
   margin-top: auto;
   width: min(var(--oft-page-max), 100% - 2 * var(--oft-gutter));
@@ -169,7 +170,18 @@ mdui-button.home-action::part(end-icon) { font-size: 1.5rem; opacity: .75; }
   flex-wrap: wrap;
   gap: .35rem 1rem;
 }
-.page-foot a { color: inherit; }
+.page-foot a { color: inherit; text-decoration: underline; text-underline-offset: .15em; }
+.page-foot b { font-weight: 500; }
+
+/* 传输设置的「重置」一行 */
+.settings-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .5rem .75rem;
+  margin-top: .25rem;
+}
 
 /* ------------------------------------------------------ 分步流程（OOBE） */
 .flow-grid {

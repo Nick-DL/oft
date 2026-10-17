@@ -69,13 +69,21 @@
             <mdui-icon slot="end-icon" name="arrow_forward"></mdui-icon>
           </mdui-button>
 
-          <mdui-button id="open-more" class="home-more" variant="text" icon="more_horiz">更多</mdui-button>
+          <mdui-button id="open-more" class="home-action home-more" variant="outlined" full-width>
+            <mdui-icon slot="icon" name="more_horiz"></mdui-icon>
+            <span class="home-action-text">
+              <strong>更多</strong>
+              <small>介绍、原理、版本、许可、离线安装与帮助</small>
+            </span>
+            <mdui-icon slot="end-icon" name="arrow_forward"></mdui-icon>
+          </mdui-button>
         </section>
       </div>
     </main>
 
     <footer class="page-foot">
-      <span>光学传输 · 传输核心 Decimen Optical Transfer v0.5.3（AGPL-3.0-or-later）</span>
+      <span>光学传输 · 传输核心 Decimen Optical Transfer v0.5.3</span>
+      <span>© 2026 <b>Nick_DL</b></span>
       <span>数据不经过网络，二维码内容未加密，请勿用于机密信息。</span>
     </footer>
 
@@ -178,6 +186,14 @@
                 <li>本页内嵌的核心与上游官方产物逐字节一致，只额外注入了「独立运行适配层」。</li>
               </ul>
               <mdui-list>
+                <mdui-list-item href="https://github.com/Nick-DL/oft" target="_blank" rel="noopener noreferrer" icon="code" end-icon="open_in_new">
+                  本页源码仓库（Nick_DL）
+                  <span slot="description">github.com/Nick-DL/oft · 界面外壳的源码</span>
+                </mdui-list-item>
+                <mdui-list-item href="https://github.com/Nick-DL" target="_blank" rel="noopener noreferrer" icon="person" end-icon="open_in_new">
+                  作者主页
+                  <span slot="description">github.com/Nick-DL</span>
+                </mdui-list-item>
                 <mdui-list-item href="https://github.com/bashalarmistalt/decimen-optical-transfer" target="_blank" rel="noopener noreferrer" icon="code" end-icon="open_in_new">
                   上游源码仓库
                   <span slot="description">github.com/bashalarmistalt/decimen-optical-transfer</span>
@@ -211,6 +227,13 @@
                 界面外壳（首页、发送/接收流程、样式、脚本、PWA 支持）为本项目原创；核心页面
                 <code class="oft-mono">core/send.html</code>、<code class="oft-mono">core/receive.html</code>
                 与上游 Release 产物逐字节一致。
+              </p>
+              <h3>作者与仓库</h3>
+              <p>
+                界面外壳由 <b>Nick_DL</b> 维护。
+                由于核心页面按 <b>AGPL-3.0-or-later</b> 授权，整个页面也以同一许可分发：
+                再分发时请保留核心署名、许可证与 NOTICE，并向使用者提供对应源码
+                （<code class="oft-mono">core/</code> 与上游官方产物一致，界面外壳即本仓库）。
               </p>
               <mdui-list>
                 <mdui-list-item href="./LICENSES/Decimen-Optical-Transfer-v0.5.3-AGPL-3.0.txt" icon="gavel" end-icon="arrow_forward">

@@ -155,6 +155,11 @@
   }
 
   /* ------------------------------------------------- 摄像头 / 轮询 */
+  function previewLive() {
+    var preview = bridge.find('#preview');
+    return !!preview && preview.style.display !== 'none' && (!preview.videoWidth || preview.videoWidth > 0);
+  }
+
   function startCamera() {
     if (state.manual) return Promise.resolve(false);
     return bridge.load().then(function () {
@@ -162,15 +167,23 @@
         enterManualMode(window.location.protocol === 'file:' ? 'file://' : '跨源');
         return false;
       }
-      if (state.cameraReady) return true;
+      // 从第 1 / 3 步回到扫码步骤：核心的摄像头一直在跑，把舞台切回实时画面即可，
+      // 不要因为 cameraReady 就直接返回（那样舞台会停在上一步留下的占位状态）。
+      if (state.cameraReady && previewLive()) {
+        if (els.retry) els.retry.hidden = true;
+        scanning(true);
+        stageView('frame');
+        setStatus(coreStats() || '正在扫描二维码…');
+        return true;
+      }
+      if (state.cameraReady) state.cameraReady = false;
       setStatus('正在等待摄像头授权…');
       // 记下点击前的状态文字，用来区分「核心报错」与「还没开始」
       if (state.initialStats === undefined) state.initialStats = coreStats();
       bridge.click('#start');
       state.cameraAsked = true;
       return bridge.waitUntil(function () {
-        var preview = bridge.find('#preview');
-        if (preview && preview.style.display !== 'none') return 'ok';
+        if (previewLive()) return 'ok';
         var stats = coreStats();
         var start = bridge.find('#start');
         if (start && !start.disabled && stats && stats !== state.initialStats) return 'error';
@@ -377,30 +390,26 @@
     });
   }
   if (els.backStep1) els.backStep1.addEventListener('click', function () { flow.go(1); });
-  if (els.backToScan) {
-    els.backToScan.addEventListener('click', function () {
-      state.result = null;
-      if (els.progress) els.progress.hidden = true;
-      hideShareImage();
-      flow.go(2, { force: true });
+
+  /** 再收一份：核心页重载回初始状态，再回到扫码步骤重新申请摄像头 */
+  function restartReceive() {
+    state.result = null;
+    state.cameraReady = false;
+    state.initialStats = undefined;
+    stopPolling();
+    scanning(false);
+    stageView('empty');
+    setEmpty('正在重新准备…', '马上重新打开摄像头');
+    if (els.progress) els.progress.hidden = true;
+    hideShareImage();
+    bridge.reload().then(function () {
+      return flow.go(2, { force: true });
+    }, function () {
+      U.toast('核心页面重载失败，请刷新本页');
     });
   }
-  if (els.receiveAgain) {
-    els.receiveAgain.addEventListener('click', function () {
-      state.result = null;
-      state.cameraReady = false;
-      if (els.progress) els.progress.hidden = true;
-      hideShareImage();
-      scanning(false);
-      stageView('empty');
-      setEmpty('正在重新准备…', '马上重新打开摄像头');
-      bridge.reload().then(function () {
-        return flow.go(2, { force: true });
-      }, function () {
-        U.toast('核心页面重载失败，请刷新本页');
-      });
-    });
-  }
+  if (els.backToScan) els.backToScan.addEventListener('click', restartReceive);
+  if (els.receiveAgain) els.receiveAgain.addEventListener('click', restartReceive);
   if (els.saveFile) {
     els.saveFile.addEventListener('click', function () {
       var node = state.result && state.result.downloadNode;
