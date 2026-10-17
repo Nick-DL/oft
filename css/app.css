@@ -145,6 +145,10 @@ mdui-button.home-action::part(label) {
   text-align: start;
   white-space: normal;
 }
+/* mdui 的 outlined 变体给宿主画了 1px 边框（border-box 下会从内容区扣掉 2px），
+   文本区因此比上面两个填充按钮窄 2px。这里不动 mdui 的描边，只把「更多」的
+   图标—文字间距收紧 2px（.75rem → .625rem），把宽度还给文本区。 */
+mdui-button.home-more::part(label) { padding-inline-start: .625rem; }
 .home-action-text { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
 .home-action-text strong {
   font-size: var(--mdui-typescale-title-large-size);
